@@ -11,7 +11,7 @@ initSocket(server);
 
 const startServer = async () => {
   await connectDB();
-  
+
   // Start background task deadline checker job
   const { startDeadlineJob } = require('./services/notificationService');
   startDeadlineJob();
@@ -19,9 +19,10 @@ const startServer = async () => {
   // Start background recurring task job
   const { startRecurringJob } = require('./jobs/recurringTaskJob');
   startRecurringJob();
-  
-  server.listen(env.PORT, () => {
-    console.log(`Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
+
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
   });
 };
 
