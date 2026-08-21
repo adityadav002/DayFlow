@@ -9,14 +9,14 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
   const accessOpts = {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
     maxAge: 15 * 60 * 1000 // 15 mins
   };
 
   const refreshOpts = {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   };
 
@@ -25,8 +25,13 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
 };
 
 const clearTokenCookies = (res) => {
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
+  const opts = {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'strict',
+  };
+  res.clearCookie('accessToken', opts);
+  res.clearCookie('refreshToken', opts);
 };
 
 const register = asyncHandler(async (req, res) => {

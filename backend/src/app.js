@@ -12,8 +12,15 @@ const notFoundMiddleware = require('./middlewares/notFoundMiddleware');
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Security Middlewares
 app.use(helmet());
+
+// Health Check
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'DayFlow API is running' });
+});
 app.use(cors({
   origin: env.CLIENT_URL,
   credentials: true
