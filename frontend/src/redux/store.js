@@ -9,6 +9,7 @@ import workspaceReducer from './slices/workspaceSlice';
 import projectReducer from './slices/projectSlice';
 import teamReducer from './slices/teamSlice';
 import notificationReducer from './slices/notificationSlice';
+import meetingReducer from './slices/meetingSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,6 @@ export const store = configureStore({
     projects: projectReducer,
     teams: teamReducer,
     notifications: notificationReducer,
+    meeting: meetingReducer,
   },
 });

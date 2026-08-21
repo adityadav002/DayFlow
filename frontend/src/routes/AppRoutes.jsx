@@ -16,6 +16,7 @@ const CalendarPage = React.lazy(() => import('../pages/CalendarPage'));
 const MyDayPage = React.lazy(() => import('../pages/MyDayPage'));
 const ProjectPage = React.lazy(() => import('../pages/ProjectPage'));
 const DashboardView = React.lazy(() => import('../pages/DashboardView'));
+const MessagesPage = React.lazy(() => import('../pages/MessagesPage'));
 
 const AppRoutes = () => {
   return (
@@ -39,6 +40,7 @@ const AppRoutes = () => {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
           </Route>
         </Route>
         

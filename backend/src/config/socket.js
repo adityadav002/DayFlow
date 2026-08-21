@@ -4,6 +4,7 @@ const socketAuth = require('../sockets/socketAuth');
 const boardHandlers = require('../sockets/boardHandlers');
 const taskHandlers = require('../sockets/taskHandlers');
 const presenceHandlers = require('../sockets/presenceHandlers');
+const meetingHandlers = require('../sockets/meetingHandlers');
 
 let io;
 
@@ -61,6 +62,7 @@ const initSocket = (server) => {
     // Register handlers
     boardHandlers.registerBoardHandlers(io, socket);
     taskHandlers.registerTaskHandlers(io, socket);
+    meetingHandlers.registerMeetingHandlers(io, socket);
 
     socket.on('disconnect', () => {
       // Remove from presence map

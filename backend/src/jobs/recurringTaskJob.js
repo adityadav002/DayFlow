@@ -1,8 +1,14 @@
 const Task = require('../models/Task');
 const { getNextOccurrence } = require('../utils/recurrenceEngine');
 const { startOfDay } = require('date-fns');
+const mongoose = require('mongoose');
 
 async function processRecurringTasks() {
+  if (mongoose.connection.readyState !== 1) {
+    console.warn('[RECURRING JOB] MongoDB unavailable; skipping this execution to prevent errors.');
+    return;
+  }
+
   try {
     const today = startOfDay(new Date());
     const templates = await Task.find({

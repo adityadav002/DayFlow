@@ -7,6 +7,9 @@ import { toggleSidebar } from '../../redux/slices/uiSlice';
 import NotificationBell from '../notifications/NotificationBell';
 import useSocket from '../../hooks/useSocket';
 import GlobalSearchModal from '../common/GlobalSearchModal';
+import IncomingCallOverlay from '../meetings/IncomingCallOverlay';
+import PreJoinModal from '../meetings/PreJoinModal';
+import ActiveCallModal from '../meetings/ActiveCallModal';
 
 const AppLayout = () => {
   const dispatch = useDispatch();
@@ -72,6 +75,9 @@ const AppLayout = () => {
         </main>
       </div>
       <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <IncomingCallOverlay />
+      <PreJoinModal />
+      <ActiveCallModal />
     </div>
   );
 };

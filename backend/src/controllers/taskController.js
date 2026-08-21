@@ -36,7 +36,9 @@ const updateTask = asyncHandler(async (req, res) => {
   const task = await taskService.updateTask(req.params.id, req.body, req.user._id);
   
   // Compatibility event
-  getIo().to(task.boardId.toString()).emit('task:updated', task);
+  if (task.boardId) {
+    getIo().to(task.boardId.toString()).emit('task:updated', task);
+  }
 
   // New M7 real-time events
   if (task.project) {
@@ -169,11 +171,13 @@ const bulkUpdatePositions = asyncHandler(async (req, res) => {
 
 const deleteTask = asyncHandler(async (req, res) => {
   const task = await require('../models/Task').findById(req.params.id);
-  const deleteScope = req.body.deleteScope || req.query.deleteScope || 'this';
+  const deleteScope = req.body?.deleteScope || req.query?.deleteScope || 'this';
   await taskService.deleteTask(req.params.id, req.user._id, deleteScope);
   if (task) {
     // Compatibility event
-    getIo().to(task.boardId.toString()).emit('task:deleted', { taskId: req.params.id });
+    if (task.boardId) {
+      getIo().to(task.boardId.toString()).emit('task:deleted', { taskId: req.params.id });
+    }
 
     // New M7 real-time event: TASK_DELETED
     if (task.project) {

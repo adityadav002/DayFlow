@@ -15,8 +15,10 @@ import { formatDistanceToNow } from 'date-fns';
 import {
   MessageSquare, Paperclip, Clock, Trash2, User, AlignLeft, Send,
   Sun, X as SunOff, Plus, CheckSquare, Square, ChevronDown, Tag, Lock,
-  Play, Pause, Repeat
+  Play, Pause, Repeat, Phone, Video
 } from 'lucide-react';
+import { joinMeeting } from '../../redux/slices/meetingSlice';
+import api from '../../api/axiosInstance';
 import toast from 'react-hot-toast';
 import { cn, smartDueDate } from '../../utils/helpers';
 
@@ -50,6 +52,22 @@ const AssigneeSelector = ({ task, dispatch }) => {
 
   const currentAssigneeId = task.assignedTo?._id || task.assignedTo || '';
 
+  const handleDiscuss = async () => {
+    if (!currentAssigneeId) return;
+    try {
+      const peerName = members.find(m => (m.user?._id || m.user) === currentAssigneeId)?.user?.name || 'Assignee';
+      const { data } = await api.post('/meetings/initiate', {
+        title: `Discuss: ${task.title}`,
+        participantIds: [currentAssigneeId],
+        type: 'audio'
+      });
+      toast.success(`Calling ${peerName}...`);
+      dispatch(joinMeeting({ meeting: data }));
+    } catch (err) {
+      toast.error('Failed to initiate call');
+    }
+  };
+
   return (
     <div className="flex items-center space-x-2">
       <User className="h-4 w-4 text-surface-400 shrink-0" />
@@ -69,6 +87,15 @@ const AssigneeSelector = ({ task, dispatch }) => {
           );
         })}
       </select>
+      {currentAssigneeId && (
+        <button 
+          onClick={handleDiscuss}
+          className="p-1.5 rounded-full bg-primary-100 text-primary-600 hover:bg-primary-200 transition-colors shrink-0" 
+          title="Discuss with assignee"
+        >
+          <Phone className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 };

@@ -351,7 +351,7 @@ const deleteTask = async (taskId, userId, deleteScope = 'this') => {
 
   const boardId = task.boardId;
 
-  // Blocker resolution/notification on deletion
+  // 1. Blocker resolution/notification on deletion
   try {
     const TaskDependency = require('../models/TaskDependency');
     const { createNotification } = require('./notificationService');
@@ -381,17 +381,42 @@ const deleteTask = async (taskId, userId, deleteScope = 'this') => {
           });
         }
         
-        emitToProject(task.project.toString(), 'TASK_DEPENDENCY_RESOLVED', {
-          taskId: dependentTask._id.toString(),
-          resolvedBlockerId: task._id.toString(),
-          allResolved: true
-        });
+        if (task.project) {
+          emitToProject(task.project.toString(), 'TASK_DEPENDENCY_RESOLVED', {
+            taskId: dependentTask._id.toString(),
+            resolvedBlockerId: task._id.toString(),
+            allResolved: true
+          });
+        }
       }
     }
   } catch (err) {
     console.error('Error handling dependency cleanup on task deletion:', err);
   }
 
+  // 2. Cascade delete related records
+  try {
+    const Comment = require('../models/Comment');
+    const Notification = require('../models/Notification');
+    const Activity = require('../models/Activity');
+    const Attachment = require('../models/Attachment');
+
+    // Delete subtasks recursively
+    const subtasks = await Task.find({ parentTask: taskId });
+    for (const subtask of subtasks) {
+      await deleteTask(subtask._id, userId, 'this');
+    }
+
+    // Delete related records
+    await Comment.deleteMany({ task: taskId });
+    await Activity.deleteMany({ task: taskId });
+    await Notification.deleteMany({ entityType: 'task', entityId: taskId });
+    await Attachment.deleteMany({ entityType: 'task', entityId: taskId });
+  } catch (cleanupErr) {
+    console.error('Error cleaning up related records on task deletion:', cleanupErr);
+  }
+
+  // 3. Delete Task
   await Task.findByIdAndDelete(taskId);
   try { require('../controllers/dashboardController').clearDashboardCache(); } catch (e) {}
 

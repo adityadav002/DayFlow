@@ -28,7 +28,8 @@ const activitySchema = new mongoose.Schema(
         'reopened',
         'description_changed',
         'title_changed',
-        'attachment_added'
+        'attachment_added',
+        'task_deleted'
       ],
       required: true
     },

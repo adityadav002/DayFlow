@@ -29,6 +29,8 @@ const createEventSchema = z.object({
   context: z.enum(CONTEXT_TYPES).optional().default('work'),
   color: z.string().optional().nullable(),
   isRecurring: z.boolean().optional().default(false),
+  isMeeting: z.boolean().optional().default(false),
+  meetingType: z.string().optional().nullable(),
   recurrenceRule: recurrenceRuleSchema,
   parentRecurringEvent: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid event ID').optional().nullable()
 }).refine(data => data.endDateTime >= data.startDateTime, {
@@ -49,6 +51,8 @@ const updateEventSchema = z.object({
   context: z.enum(CONTEXT_TYPES).optional(),
   color: z.string().optional().nullable(),
   isRecurring: z.boolean().optional(),
+  isMeeting: z.boolean().optional(),
+  meetingType: z.string().optional().nullable(),
   recurrenceRule: recurrenceRuleSchema,
   parentRecurringEvent: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid event ID').optional().nullable()
 }).refine(data => {

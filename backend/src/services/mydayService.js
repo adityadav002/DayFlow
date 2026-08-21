@@ -54,7 +54,7 @@ const getMyDayData = async (dateVal, userId) => {
           endDateTime: { $gte: todayStart }
         }
       ]
-    }).populate('creator', 'name avatar').populate('participants', 'name avatar');
+    }).populate('creator', 'name avatar').populate('participants', 'name avatar').populate('meetingId');
 
     // 3. Fetch Today Reminders
     const todayReminders = await Reminder.find({

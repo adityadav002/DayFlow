@@ -34,10 +34,17 @@ const createNotification = async ({ recipient, type, title, body, entityType, en
   }
 };
 
+const mongoose = require('mongoose');
+
 /**
  * Scan database for tasks due in less than 24 hours and emit alerts.
  */
 const checkUpcomingDeadlines = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    console.warn('[JOBS] MongoDB unavailable; skipping deadline check to prevent errors.');
+    return;
+  }
+
   try {
     const Task = require('../models/Task');
     const now = new Date();

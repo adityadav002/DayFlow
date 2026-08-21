@@ -1,9 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
+import { userOnline, userOffline, setSocketConnected, setOnlineUsers } from '../redux/slices/uiSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { taskAdded, taskUpdated, taskDeleted, tasksBulkUpdated, commentCountIncremented, commentCountDecremented } from '../redux/slices/taskSlice';
-import { userOnline, userOffline, setSocketConnected, setOnlineUsers } from '../redux/slices/uiSlice';
 import { fetchProjectById } from '../redux/slices/projectSlice';
+import { 
+  setIncomingCall, 
+  addParticipant, 
+  removeParticipant, 
+  updateParticipantMediaState, 
+  leaveMeeting 
+} from '../redux/slices/meetingSlice';
+import webrtcService from '../services/webrtcService';
 import { addIncomingNotification } from '../redux/slices/notificationSlice';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -18,6 +26,12 @@ const useSocket = (boardId) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { activeMeeting } = useSelector((state) => state.meeting);
+
+  const activeMeetingRef = useRef(activeMeeting);
+  useEffect(() => {
+    activeMeetingRef.current = activeMeeting;
+  }, [activeMeeting]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -45,6 +59,10 @@ const useSocket = (boardId) => {
       dispatch(setSocketConnected(true));
       if (boardId) {
         socket.emit('join-board', { boardId });
+      }
+      if (activeMeetingRef.current) {
+        console.log('[SOCKET] Rejoining active meeting room:', activeMeetingRef.current._id);
+        socket.emit('meeting:join', { meetingId: activeMeetingRef.current._id });
       }
     };
 
@@ -220,6 +238,13 @@ const useSocket = (boardId) => {
       window.dispatchEvent(event);
     };
 
+    // 14. CHAT_MESSAGE
+    const handleChatMessage = (msg) => {
+      console.log('[SOCKET] chat:message received:', msg);
+      const event = new CustomEvent('chat:message', { detail: msg });
+      window.dispatchEvent(event);
+    };
+
     // Compatibility support for legacy board event listeners
     const handleLegacyTaskCreated = (task) => {
       if (boardId && task.boardId === boardId) {
@@ -253,11 +278,44 @@ const useSocket = (boardId) => {
     socket.on('COMMENT_CREATED', handleCommentCreated);
     socket.on('COMMENT_UPDATED', handleCommentUpdated);
     socket.on('COMMENT_DELETED', handleCommentDeleted);
+    socket.on('chat:message', handleChatMessage);
 
     socket.on('task:created', handleLegacyTaskCreated);
     socket.on('task:updated', handleLegacyTaskUpdated);
     socket.on('task:deleted', handleLegacyTaskDeleted);
     socket.on('task:bulk-updated', handleLegacyTaskBulkUpdated);
+
+    // Meeting / Call Events
+    const handleMeetingInvitation = (data) => {
+      console.log('[SOCKET] meeting:invitation:', data);
+      dispatch(setIncomingCall({ ...data, caller: data.host }));
+    };
+    const handleMeetingUserJoined = (data) => {
+      console.log('[SOCKET] meeting:user_joined:', data);
+      dispatch(addParticipant(data));
+      // If we are already connected to the meeting, we act as initiator to the new peer
+      if (webrtcService.meetingId) {
+        console.log('[WEBRTC] Initiating connection to new peer:', data.userId);
+        webrtcService.connectToPeer(data.userId, true);
+      }
+    };
+    const handleMeetingUserLeft = (data) => {
+      console.log('[SOCKET] meeting:user_left:', data);
+      dispatch(removeParticipant(data));
+    };
+    const handleMeetingMediaStateChanged = (data) => {
+      dispatch(updateParticipantMediaState(data));
+    };
+    const handleMeetingEnded = (data) => {
+      console.log('[SOCKET] meeting:ended:', data);
+      dispatch(leaveMeeting());
+    };
+
+    socket.on('meeting:invitation', handleMeetingInvitation);
+    socket.on('meeting:user_joined', handleMeetingUserJoined);
+    socket.on('meeting:user_left', handleMeetingUserLeft);
+    socket.on('meeting:media_state_changed', handleMeetingMediaStateChanged);
+    socket.on('meeting:ended', handleMeetingEnded);
 
     return () => {
       activeListenersCount--;
@@ -282,11 +340,18 @@ const useSocket = (boardId) => {
       socket.off('COMMENT_CREATED', handleCommentCreated);
       socket.off('COMMENT_UPDATED', handleCommentUpdated);
       socket.off('COMMENT_DELETED', handleCommentDeleted);
+      socket.off('chat:message', handleChatMessage);
 
       socket.off('task:created', handleLegacyTaskCreated);
       socket.off('task:updated', handleLegacyTaskUpdated);
       socket.off('task:deleted', handleLegacyTaskDeleted);
       socket.off('task:bulk-updated', handleLegacyTaskBulkUpdated);
+
+      socket.off('meeting:invitation', handleMeetingInvitation);
+      socket.off('meeting:user_joined', handleMeetingUserJoined);
+      socket.off('meeting:user_left', handleMeetingUserLeft);
+      socket.off('meeting:media_state_changed', handleMeetingMediaStateChanged);
+      socket.off('meeting:ended', handleMeetingEnded);
 
       if (boardId) {
         socket.emit('leave-board', { boardId });

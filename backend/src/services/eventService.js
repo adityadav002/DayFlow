@@ -1,12 +1,55 @@
 const Event = require('../models/Event');
+const Meeting = require('../models/Meeting');
 const ApiError = require('../utils/ApiError');
 
 const createEvent = async (eventData, userId) => {
+  let meetingId = null;
+  if (eventData.isMeeting) {
+    const meeting = await Meeting.create({
+      title: eventData.title,
+      createdBy: userId,
+      type: eventData.meetingType || 'video',
+      status: 'waiting',
+      scheduledAt: eventData.startDateTime,
+      project: eventData.project || null
+    });
+    
+    if (eventData.participants && eventData.participants.length > 0) {
+      const MeetingParticipant = require('../models/MeetingParticipant');
+      const participantsData = eventData.participants.map(id => ({
+        meeting: meeting._id,
+        user: id,
+        status: 'invited'
+      }));
+      participantsData.push({
+        meeting: meeting._id,
+        user: userId,
+        status: 'joined',
+        joinedAt: new Date()
+      });
+      await MeetingParticipant.insertMany(participantsData);
+    } else {
+      const MeetingParticipant = require('../models/MeetingParticipant');
+      await MeetingParticipant.create({
+        meeting: meeting._id,
+        user: userId,
+        status: 'joined',
+        joinedAt: new Date()
+      });
+    }
+    
+    meetingId = meeting._id;
+  }
+
   const event = await Event.create({
     ...eventData,
-    creator: userId
+    creator: userId,
+    meetingId
   });
-  return await Event.findById(event._id).populate('creator', 'name avatar').populate('participants', 'name avatar');
+  return await Event.findById(event._id)
+    .populate('creator', 'name avatar')
+    .populate('participants', 'name avatar')
+    .populate('meetingId');
 };
 
 const getEvents = async (query, userId) => {
@@ -25,17 +68,23 @@ const getEvents = async (query, userId) => {
   if (query.context) {
     filter.context = query.context;
   }
+  
+  if (query.projectId) {
+    filter.project = query.projectId;
+  }
 
   return await Event.find(filter)
     .populate('creator', 'name avatar')
     .populate('participants', 'name avatar')
+    .populate('meetingId')
     .sort({ startDateTime: 1 });
 };
 
 const getEventById = async (eventId, userId) => {
   const event = await Event.findById(eventId)
     .populate('creator', 'name avatar')
-    .populate('participants', 'name avatar');
+    .populate('participants', 'name avatar')
+    .populate('meetingId');
 
   if (!event) {
     throw new ApiError(404, 'Event not found');
@@ -67,7 +116,10 @@ const updateEvent = async (eventId, updates, userId) => {
   });
 
   await event.save();
-  return await Event.findById(eventId).populate('creator', 'name avatar').populate('participants', 'name avatar');
+  return await Event.findById(eventId)
+    .populate('creator', 'name avatar')
+    .populate('participants', 'name avatar')
+    .populate('meetingId');
 };
 
 const deleteEvent = async (eventId, userId) => {
@@ -79,6 +131,12 @@ const deleteEvent = async (eventId, userId) => {
 
   if (event.creator.toString() !== userId.toString()) {
     throw new ApiError(403, 'Only the creator can delete the event');
+  }
+
+  if (event.meetingId) {
+    const MeetingParticipant = require('../models/MeetingParticipant');
+    await Meeting.findByIdAndDelete(event.meetingId);
+    await MeetingParticipant.deleteMany({ meeting: event.meetingId });
   }
 
   await Event.findByIdAndDelete(eventId);

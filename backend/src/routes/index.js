@@ -11,6 +11,8 @@ const mydayRoutes = require('./mydayRoutes');
 const workspaceRoutes = require('./workspaceRoutes');
 const projectRoutes = require('./projectRoutes');
 const notificationRoutes = require('./notificationRoutes');
+const meetingRoutes = require('./meetingRoutes');
+const chatRoutes = require('./chatRoutes');
 
 const router = express.Router();
 
@@ -26,6 +28,8 @@ router.use('/myday', mydayRoutes);
 router.use('/workspaces', workspaceRoutes);
 router.use('/projects', projectRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/meetings', meetingRoutes);
+router.use('/chat', chatRoutes);
 
 const searchRoutes = require('./searchRoutes');
 const tagRoutes = require('./tagRoutes');

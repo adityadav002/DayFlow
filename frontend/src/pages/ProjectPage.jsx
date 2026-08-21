@@ -6,7 +6,9 @@ import * as projectApi from '../api/projectApi';
 import BoardPage from './BoardPage';
 import Loader from '../components/common/Loader';
 import Button from '../components/common/Button';
-import { Calendar, Users, Layout, Info, UserPlus, Trash2, Shield, FolderOpen, MessageSquare, Clock, BarChart2 } from 'lucide-react';
+import { Calendar, Users, Layout, Info, UserPlus, Trash2, Shield, FolderOpen, MessageSquare, Clock, BarChart2, Video } from 'lucide-react';
+import { joinMeeting } from '../redux/slices/meetingSlice';
+import * as eventApi from '../api/eventApi';
 import ProjectAnalytics from '../components/projects/ProjectAnalytics';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -26,6 +28,13 @@ const ProjectPage = () => {
   const [addingMember, setAddingMember] = useState(false);
   const [projectTasks, setProjectTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
+  const [projectMeetings, setProjectMeetings] = useState([]);
+  const [loadingMeetings, setLoadingMeetings] = useState(false);
+
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [meetingTitle, setMeetingTitle] = useState('');
+  const [meetingDate, setMeetingDate] = useState('');
+  const [schedulingMeeting, setSchedulingMeeting] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -33,8 +42,24 @@ const ProjectPage = () => {
       if (activeTab === 'overview') {
         fetchTasks();
       }
+      if (activeTab === 'meetings') {
+        fetchMeetings();
+      }
     }
   }, [dispatch, projectId, activeTab]);
+
+  const fetchMeetings = async () => {
+    try {
+      setLoadingMeetings(true);
+      const res = await eventApi.getEvents({ projectId });
+      const events = res.data.data;
+      setProjectMeetings(events.filter(e => e.meetingId));
+    } catch (err) {
+      console.error('Failed to load project meetings', err);
+    } finally {
+      setLoadingMeetings(false);
+    }
+  };
 
   const fetchTasks = async () => {
     try {
@@ -85,6 +110,55 @@ const ProjectPage = () => {
     }
   };
 
+  const handleScheduleMeeting = async (e) => {
+    e.preventDefault();
+    if (!meetingTitle.trim() || !meetingDate) return;
+    
+    setSchedulingMeeting(true);
+    try {
+      const startDateTime = new Date(meetingDate);
+      const endDateTime = new Date(startDateTime.getTime() + 60 * 60 * 1000); // 1 hour later
+      
+      const participants = currentProject.members
+        .map(m => m.user._id || m.user)
+        .filter(id => id !== currentUser?._id);
+        
+      await eventApi.createEvent({
+        title: meetingTitle,
+        startDateTime,
+        endDateTime,
+        isMeeting: true,
+        meetingType: 'video',
+        participants,
+        project: projectId
+      });
+      
+      toast.success('Meeting scheduled successfully!');
+      setShowScheduleModal(false);
+      setMeetingTitle('');
+      setMeetingDate('');
+      fetchMeetings();
+    } catch (err) {
+      toast.error('Failed to schedule meeting');
+      console.error(err);
+    } finally {
+      setSchedulingMeeting(false);
+    }
+  };
+
+  const handleDeleteMeeting = async (eventId) => {
+    if (window.confirm('Are you sure you want to delete this meeting?')) {
+      try {
+        await eventApi.deleteEvent(eventId);
+        toast.success('Meeting deleted successfully!');
+        fetchMeetings();
+      } catch (err) {
+        toast.error('Failed to delete meeting');
+        console.error(err);
+      }
+    }
+  };
+
   if (currentProjectStatus === 'loading' || !currentProject) {
     return <Loader fullScreen />;
   }
@@ -128,6 +202,7 @@ const ProjectPage = () => {
             { id: 'board', label: 'Kanban Board', icon: Layout },
             { id: 'members', label: 'Members', icon: Users },
             { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+            { id: 'meetings', label: 'Meetings', icon: Video },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -357,7 +432,110 @@ const ProjectPage = () => {
             <ProjectAnalytics projectId={projectId} />
           </div>
         )}
+
+        {activeTab === 'meetings' && (
+          <div className="p-6 max-w-4xl space-y-6">
+            <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-md font-semibold text-surface-800">Project Meetings</h3>
+                <Button onClick={() => setShowScheduleModal(true)}>
+                  Schedule Meeting
+                </Button>
+              </div>
+              
+              {loadingMeetings ? (
+                <div className="py-4 text-sm text-surface-400">Loading meetings...</div>
+              ) : projectMeetings.length === 0 ? (
+                <div className="py-6 text-center text-sm text-surface-400 italic">
+                  <Video className="h-10 w-10 text-surface-300 mx-auto mb-2" />
+                  No meetings scheduled for this project.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {projectMeetings.map(event => (
+                    <div key={event._id} className="p-4 border border-surface-200 rounded-lg bg-surface-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-bold text-surface-900">{event.title}</h4>
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2 py-0.5 text-xs font-semibold rounded bg-primary-100 text-primary-700 uppercase">
+                            {event.meetingId?.status || 'Scheduled'}
+                          </span>
+                          {(canManageMembers || event.creator?._id === currentUser?._id) && (
+                            <button
+                              onClick={() => handleDeleteMeeting(event._id)}
+                              className="text-surface-400 hover:text-red-600 transition-colors"
+                              title="Delete meeting"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-sm text-surface-600 mb-4">{format(new Date(event.startDateTime), 'PPp')}</p>
+                      
+                      <button 
+                        onClick={() => dispatch(joinMeeting({ meeting: event.meetingId }))}
+                        className="w-full flex items-center justify-center space-x-2 py-2 bg-primary-600 text-white rounded-md text-sm font-semibold hover:bg-primary-500 transition-colors"
+                      >
+                        <Video className="h-4 w-4" />
+                        <span>Join Video Call</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Schedule Meeting Modal */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-xl font-bold text-surface-900 mb-4">Schedule a Meeting</h2>
+            <form onSubmit={handleScheduleMeeting} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-surface-700 mb-1">
+                  Meeting Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={meetingTitle}
+                  onChange={e => setMeetingTitle(e.target.value)}
+                  className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  placeholder="e.g. Project Sync"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-surface-700 mb-1">
+                  Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={meetingDate}
+                  onChange={e => setMeetingDate(e.target.value)}
+                  className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                />
+              </div>
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowScheduleModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={schedulingMeeting}>
+                  {schedulingMeeting ? 'Scheduling...' : 'Schedule Meeting'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

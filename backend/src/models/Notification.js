@@ -19,7 +19,8 @@ const NotificationSchema = new mongoose.Schema({
       'TEAM_MEMBER_ADDED',
       'TEAM_MEMBER_REMOVED',
       'DEADLINE_CHANGED',
-      'TASK_UNBLOCKED'
+      'TASK_UNBLOCKED',
+      'MEETING_INVITE'
     ],
     required: true
   },
@@ -33,7 +34,7 @@ const NotificationSchema = new mongoose.Schema({
   },
   entityType: { 
     type: String, 
-    enum: ['task', 'project', 'team', 'comment', 'event'] 
+    enum: ['task', 'project', 'team', 'comment', 'event', 'meeting', 'conversation'] 
   },
   entityId: { 
     type: mongoose.Schema.Types.ObjectId 

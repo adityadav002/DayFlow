@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { LogOut, Home, X, Plus, Users, Settings, Calendar, Bell, Sun, Search, BarChart2 } from 'lucide-react';
+import { LogOut, Home, X, Plus, Users, Settings, Calendar, Bell, Sun, Search, BarChart2, MessageSquare } from 'lucide-react';
 import { toggleSidebar } from '../../redux/slices/uiSlice';
 import { logoutUser } from '../../redux/slices/authSlice';
 import { fetchProjects } from '../../redux/slices/projectSlice';
@@ -107,6 +107,10 @@ const Sidebar = () => {
             <NavLink to="/myday" className={navItemClass}>
               <Sun className="mr-3 h-5 w-5 animate-pulse text-amber-500" />
               My Day
+            </NavLink>
+            <NavLink to="/messages" className={navItemClass}>
+              <MessageSquare className="mr-3 h-5 w-5" />
+              Messages
             </NavLink>
             <NavLink to="/dashboard" className={navItemClass}>
               <Home className="mr-3 h-5 w-5" />

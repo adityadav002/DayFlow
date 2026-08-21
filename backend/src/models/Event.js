@@ -74,6 +74,11 @@ const EventSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Event',
     default: null
+  },
+  meetingId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Meeting',
+    default: null
   }
 }, {
   timestamps: true

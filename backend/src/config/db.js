@@ -29,12 +29,24 @@ const migrateExistingUsernames = async () => {
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(env.MONGO_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(`[MongoDB] Connected: ${conn.connection.host}`);
     await migrateExistingUsernames();
   } catch (error) {
-    console.error(`Error connecting to MongoDB: ${error.message}`);
+    console.error(`[MongoDB] Error connecting to MongoDB: ${error.message}`);
     process.exit(1);
   }
 };
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('[MongoDB] Connection lost. Temporary connectivity failure; operations will retry.');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('[MongoDB] Reconnected to the database.');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error(`[MongoDB] Connection error: ${err.message}`);
+});
 
 module.exports = connectDB;

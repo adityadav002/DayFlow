@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import { Trash2, Clock, Calendar, Check, Save } from 'lucide-react';
+import { Trash2, Clock, Calendar, Check, Save, Video } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Input from '../common/Input';
 import { createTask } from '../../redux/slices/taskSlice';
+import { joinMeeting } from '../../redux/slices/meetingSlice';
 import * as eventApi from '../../api/eventApi';
 import * as reminderApi from '../../api/reminderApi';
 
@@ -27,6 +28,8 @@ export const CreateItemModal = ({ isOpen, onClose, prefilledDate, onSaveSuccess 
   const [startDateTime, setStartDateTime] = useState('');
   const [endDateTime, setEndDateTime] = useState('');
   const [location, setLocation] = useState('');
+  const [isMeeting, setIsMeeting] = useState(false);
+  const [meetingType, setMeetingType] = useState('video');
 
   // Reminders specific fields
   const [reminderDateTime, setReminderDateTime] = useState('');
@@ -38,6 +41,8 @@ export const CreateItemModal = ({ isOpen, onClose, prefilledDate, onSaveSuccess 
       setContext('work');
       setLocation('');
       setPriority('Medium');
+      setIsMeeting(false);
+      setMeetingType('video');
       
       const formattedDate = prefilledDate ? new Date(prefilledDate).toISOString().split('T')[0] : '';
       setDueDate(formattedDate);
@@ -97,7 +102,9 @@ export const CreateItemModal = ({ isOpen, onClose, prefilledDate, onSaveSuccess 
           startDateTime,
           endDateTime,
           context,
-          location
+          location,
+          isMeeting,
+          meetingType
         };
         await eventApi.createEvent(eventData);
         toast.success('Event created successfully');
@@ -246,6 +253,29 @@ export const CreateItemModal = ({ isOpen, onClose, prefilledDate, onSaveSuccess 
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
+            <div className="flex items-center justify-between p-4 bg-surface-50 border border-surface-200 rounded-lg">
+              <div>
+                <h4 className="text-sm font-semibold text-surface-800">Add Video Meeting</h4>
+                <p className="text-xs text-surface-500">Automatically creates a joinable WebRTC meeting.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={isMeeting} onChange={(e) => setIsMeeting(e.target.checked)} />
+                <div className="w-11 h-6 bg-surface-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+              </label>
+            </div>
+            {isMeeting && (
+              <div className="space-y-1 mt-4">
+                <label className="text-sm font-medium text-surface-700">Meeting Type</label>
+                <select
+                  className="w-full rounded-md border border-surface-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  value={meetingType}
+                  onChange={(e) => setMeetingType(e.target.value)}
+                >
+                  <option value="video">Video Call</option>
+                  <option value="audio">Audio Call</option>
+                </select>
+              </div>
+            )}
           </>
         )}
 
@@ -272,6 +302,7 @@ export const CreateItemModal = ({ isOpen, onClose, prefilledDate, onSaveSuccess 
 };
 
 export const EventDetailModal = ({ isOpen, onClose, event, onSaveSuccess }) => {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [context, setContext] = useState('work');
@@ -329,6 +360,13 @@ export const EventDetailModal = ({ isOpen, onClose, event, onSaveSuccess }) => {
   };
 
   if (!event) return null;
+
+  const handleJoinMeeting = () => {
+    if (event.meetingId) {
+      dispatch(joinMeeting({ meeting: event.meetingId }));
+      onClose();
+    }
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={event.title}>
@@ -391,6 +429,12 @@ export const EventDetailModal = ({ isOpen, onClose, event, onSaveSuccess }) => {
           </div>
 
           <div className="pt-4 border-t border-surface-200 space-y-2">
+            {event.meetingId && (
+              <Button className="w-full justify-center bg-primary-600 hover:bg-primary-500" onClick={handleJoinMeeting}>
+                <Video className="mr-2 h-4 w-4" />
+                Join Meeting
+              </Button>
+            )}
             <Button className="w-full justify-start" size="sm" onClick={handleUpdate}>
               <Save className="mr-2 h-4 w-4" />
               Save Event
