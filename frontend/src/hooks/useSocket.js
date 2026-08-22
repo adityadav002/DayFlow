@@ -4,6 +4,8 @@ import { userOnline, userOffline, setSocketConnected, setOnlineUsers } from '../
 import { useDispatch, useSelector } from 'react-redux';
 import { taskAdded, taskUpdated, taskDeleted, tasksBulkUpdated, commentCountIncremented, commentCountDecremented } from '../redux/slices/taskSlice';
 import { fetchProjectById } from '../redux/slices/projectSlice';
+import { eventReceivedViaSocket, eventRemovedViaSocket } from '../redux/slices/eventSlice';
+import { reminderReceivedViaSocket, reminderRemovedViaSocket } from '../redux/slices/reminderSlice';
 import { 
   setIncomingCall, 
   addParticipant, 
@@ -245,6 +247,34 @@ const useSocket = (boardId) => {
       window.dispatchEvent(event);
     };
 
+    // 15. EVENTS
+    const handleEventCreated = (event) => {
+      console.log('[SOCKET] EVENT_CREATED received:', event);
+      dispatch(eventReceivedViaSocket(event));
+    };
+    const handleEventUpdated = (event) => {
+      console.log('[SOCKET] EVENT_UPDATED received:', event);
+      dispatch(eventReceivedViaSocket(event));
+    };
+    const handleEventDeleted = (eventId) => {
+      console.log('[SOCKET] EVENT_DELETED received:', eventId);
+      dispatch(eventRemovedViaSocket(eventId));
+    };
+
+    // 16. REMINDERS
+    const handleReminderCreated = (reminder) => {
+      console.log('[SOCKET] REMINDER_CREATED received:', reminder);
+      dispatch(reminderReceivedViaSocket(reminder));
+    };
+    const handleReminderUpdated = (reminder) => {
+      console.log('[SOCKET] REMINDER_UPDATED received:', reminder);
+      dispatch(reminderReceivedViaSocket(reminder));
+    };
+    const handleReminderDeleted = (reminderId) => {
+      console.log('[SOCKET] REMINDER_DELETED received:', reminderId);
+      dispatch(reminderRemovedViaSocket(reminderId));
+    };
+
     // Compatibility support for legacy board event listeners
     const handleLegacyTaskCreated = (task) => {
       if (boardId && task.boardId === boardId) {
@@ -279,6 +309,14 @@ const useSocket = (boardId) => {
     socket.on('COMMENT_UPDATED', handleCommentUpdated);
     socket.on('COMMENT_DELETED', handleCommentDeleted);
     socket.on('chat:message', handleChatMessage);
+
+    socket.on('EVENT_CREATED', handleEventCreated);
+    socket.on('EVENT_UPDATED', handleEventUpdated);
+    socket.on('EVENT_DELETED', handleEventDeleted);
+    
+    socket.on('REMINDER_CREATED', handleReminderCreated);
+    socket.on('REMINDER_UPDATED', handleReminderUpdated);
+    socket.on('REMINDER_DELETED', handleReminderDeleted);
 
     socket.on('task:created', handleLegacyTaskCreated);
     socket.on('task:updated', handleLegacyTaskUpdated);
@@ -341,6 +379,14 @@ const useSocket = (boardId) => {
       socket.off('COMMENT_UPDATED', handleCommentUpdated);
       socket.off('COMMENT_DELETED', handleCommentDeleted);
       socket.off('chat:message', handleChatMessage);
+
+      socket.off('EVENT_CREATED', handleEventCreated);
+      socket.off('EVENT_UPDATED', handleEventUpdated);
+      socket.off('EVENT_DELETED', handleEventDeleted);
+      
+      socket.off('REMINDER_CREATED', handleReminderCreated);
+      socket.off('REMINDER_UPDATED', handleReminderUpdated);
+      socket.off('REMINDER_DELETED', handleReminderDeleted);
 
       socket.off('task:created', handleLegacyTaskCreated);
       socket.off('task:updated', handleLegacyTaskUpdated);

@@ -10,6 +10,8 @@ import projectReducer from './slices/projectSlice';
 import teamReducer from './slices/teamSlice';
 import notificationReducer from './slices/notificationSlice';
 import meetingReducer from './slices/meetingSlice';
+import eventReducer from './slices/eventSlice';
+import reminderReducer from './slices/reminderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,5 +26,7 @@ export const store = configureStore({
     teams: teamReducer,
     notifications: notificationReducer,
     meeting: meetingReducer,
+    events: eventReducer,
+    reminders: reminderReducer,
   },
 });

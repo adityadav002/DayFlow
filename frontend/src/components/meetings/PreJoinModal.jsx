@@ -46,6 +46,10 @@ const PreJoinModal = () => {
       const audioTrack = stream.getAudioTracks()[0];
       if (audioTrack) audioTrack.enabled = !isLocalAudioMuted;
     }
+    
+    if (videoRef.current && stream && !isLocalVideoMuted) {
+      videoRef.current.srcObject = stream;
+    }
   }, [isLocalAudioMuted, isLocalVideoMuted, stream]);
 
   if (callStatus !== 'pre_join') return null;
