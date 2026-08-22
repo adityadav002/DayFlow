@@ -1,11 +1,15 @@
 const Reminder = require('../models/Reminder');
 const ApiError = require('../utils/ApiError');
+const { emitToUser } = require('../utils/socketEmitter');
 
 const createReminder = async (reminderData, userId) => {
   const reminder = await Reminder.create({
     ...reminderData,
     creator: userId
   });
+  
+  emitToUser(userId.toString(), 'REMINDER_CREATED', reminder);
+  
   return reminder;
 };
 
@@ -56,6 +60,9 @@ const updateReminder = async (reminderId, updates, userId) => {
   });
 
   await reminder.save();
+  
+  emitToUser(userId.toString(), 'REMINDER_UPDATED', reminder);
+  
   return reminder;
 };
 
@@ -71,6 +78,9 @@ const deleteReminder = async (reminderId, userId) => {
   }
 
   await Reminder.findByIdAndDelete(reminderId);
+  
+  emitToUser(userId.toString(), 'REMINDER_DELETED', reminderId);
+  
   return true;
 };
 
@@ -88,6 +98,9 @@ const toggleComplete = async (reminderId, userId) => {
   reminder.isCompleted = !reminder.isCompleted;
   reminder.completedAt = reminder.isCompleted ? new Date() : null;
   await reminder.save();
+  
+  emitToUser(userId.toString(), 'REMINDER_UPDATED', reminder);
+  
   return reminder;
 };
 

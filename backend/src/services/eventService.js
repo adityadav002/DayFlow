@@ -1,6 +1,7 @@
 const Event = require('../models/Event');
 const Meeting = require('../models/Meeting');
 const ApiError = require('../utils/ApiError');
+const { emitToUser } = require('../utils/socketEmitter');
 
 const createEvent = async (eventData, userId) => {
   let meetingId = null;
@@ -46,10 +47,25 @@ const createEvent = async (eventData, userId) => {
     creator: userId,
     meetingId
   });
-  return await Event.findById(event._id)
+  
+  const populatedEvent = await Event.findById(event._id)
     .populate('creator', 'name avatar')
     .populate('participants', 'name avatar')
     .populate('meetingId');
+
+  // Emit to creator
+  emitToUser(userId.toString(), 'EVENT_CREATED', populatedEvent);
+  
+  // Emit to participants
+  if (populatedEvent.participants && populatedEvent.participants.length > 0) {
+    populatedEvent.participants.forEach(p => {
+      if (p._id.toString() !== userId.toString()) {
+        emitToUser(p._id.toString(), 'EVENT_CREATED', populatedEvent);
+      }
+    });
+  }
+
+  return populatedEvent;
 };
 
 const getEvents = async (query, userId) => {
@@ -116,10 +132,24 @@ const updateEvent = async (eventId, updates, userId) => {
   });
 
   await event.save();
-  return await Event.findById(eventId)
+  const populatedEvent = await Event.findById(eventId)
     .populate('creator', 'name avatar')
     .populate('participants', 'name avatar')
     .populate('meetingId');
+
+  // Emit to creator
+  emitToUser(event.creator.toString(), 'EVENT_UPDATED', populatedEvent);
+  
+  // Emit to participants
+  if (populatedEvent.participants && populatedEvent.participants.length > 0) {
+    populatedEvent.participants.forEach(p => {
+      if (p._id.toString() !== event.creator.toString()) {
+        emitToUser(p._id.toString(), 'EVENT_UPDATED', populatedEvent);
+      }
+    });
+  }
+
+  return populatedEvent;
 };
 
 const deleteEvent = async (eventId, userId) => {
@@ -140,6 +170,19 @@ const deleteEvent = async (eventId, userId) => {
   }
 
   await Event.findByIdAndDelete(eventId);
+
+  // Emit to creator
+  emitToUser(event.creator.toString(), 'EVENT_DELETED', eventId);
+  
+  // Emit to participants
+  if (event.participants && event.participants.length > 0) {
+    event.participants.forEach(p => {
+      if (p.toString() !== event.creator.toString()) {
+        emitToUser(p.toString(), 'EVENT_DELETED', eventId);
+      }
+    });
+  }
+
   return true;
 };
 
