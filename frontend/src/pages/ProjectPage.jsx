@@ -175,7 +175,7 @@ const ProjectPage = () => {
   return (
     <div className="flex h-full flex-col bg-surface-50">
       {/* Project Header Banner */}
-      <header className="shrink-0 bg-white border-b border-surface-200 px-6 pt-5" style={{ borderTopWidth: '4px', ...borderStyle }}>
+      <header className="shrink-0 bg-white border-b border-surface-200 px-4 md:px-6 pt-4 md:pt-5" style={{ borderTopWidth: '4px', ...borderStyle }}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
           <div>
             <div className="flex items-center space-x-3">
@@ -196,7 +196,7 @@ const ProjectPage = () => {
         </div>
 
         {/* Tab Controls */}
-        <div className="flex space-x-6 border-t border-surface-100">
+        <div className="flex space-x-6 border-t border-surface-100 overflow-x-auto custom-scrollbar">
           {[
             { id: 'overview', label: 'Overview', icon: Info },
             { id: 'board', label: 'Kanban Board', icon: Layout },
@@ -210,7 +210,7 @@ const ProjectPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-3 text-sm font-medium border-b-2 transition-all ${
+                className={`flex items-center space-x-2 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap shrink-0 ${
                   isActive
                     ? 'border-primary-600 text-primary-600'
                     : 'border-transparent text-surface-500 hover:text-surface-900'
@@ -227,10 +227,10 @@ const ProjectPage = () => {
       {/* Tab Contents */}
       <div className="flex-1 overflow-auto">
         {activeTab === 'overview' && (
-          <div className="p-6 max-w-4xl space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-4 md:p-6 max-w-4xl space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {/* Project Metadata Card */}
-              <div className="md:col-span-2 bg-white rounded-xl border border-surface-200 p-6 shadow-sm space-y-4">
+              <div className="md:col-span-2 bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm space-y-4">
                 <div>
                   <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Description</h3>
                   <p className="text-sm text-surface-700 mt-1 whitespace-pre-wrap">
@@ -259,7 +259,7 @@ const ProjectPage = () => {
               </div>
 
               {/* Roles / Creator Card */}
-              <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-sm flex flex-col justify-between">
+              <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm flex flex-col justify-between">
                 <div>
                   <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Project Owner</h3>
                   <div className="flex items-center space-x-3 mt-3">
@@ -279,7 +279,7 @@ const ProjectPage = () => {
             </div>
 
             {/* Quick Task List Summary */}
-            <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-sm">
+            <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
               <h3 className="text-md font-semibold text-surface-800 mb-4">Project Tasks</h3>
               {loadingTasks ? (
                 <div className="py-4 text-sm text-surface-400">Loading tasks...</div>
@@ -339,10 +339,10 @@ const ProjectPage = () => {
         )}
 
         {activeTab === 'members' && (
-          <div className="p-6 max-w-2xl space-y-6">
+          <div className="p-4 md:p-6 max-w-2xl space-y-6">
             {/* Add member form */}
             {canManageMembers && (
-              <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-sm">
+              <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
                 <h3 className="text-md font-semibold text-surface-800 mb-3 flex items-center">
                   <UserPlus className="mr-2 h-5 w-5 text-primary-500" />
                   Add Team Member
@@ -364,7 +364,7 @@ const ProjectPage = () => {
             )}
 
             {/* Members List */}
-            <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-sm">
+            <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
               <h3 className="text-md font-semibold text-surface-800 mb-4">Project Members ({currentProject.members?.length || 0})</h3>
               <div className="divide-y divide-surface-100">
                 {currentProject.members?.map((member) => {
@@ -428,14 +428,14 @@ const ProjectPage = () => {
         )}
 
         {activeTab === 'analytics' && (
-          <div className="p-6 overflow-auto">
+          <div className="p-4 md:p-6 overflow-auto">
             <ProjectAnalytics projectId={projectId} />
           </div>
         )}
 
         {activeTab === 'meetings' && (
-          <div className="p-6 max-w-4xl space-y-6">
-            <div className="bg-white rounded-xl border border-surface-200 p-6 shadow-sm">
+          <div className="p-4 md:p-6 max-w-4xl space-y-6">
+            <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-md font-semibold text-surface-800">Project Meetings</h3>
                 <Button onClick={() => setShowScheduleModal(true)}>

@@ -61,9 +61,9 @@ const AppLayout = () => {
             </button>
             <div className="flex items-center space-x-2">
               <div className="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center">
-                <span className="font-bold text-white">K</span>
+                <span className="font-bold text-white">D</span>
               </div>
-              <span className="font-semibold text-surface-900">KanbanFlow</span>
+              <span className="font-semibold text-surface-900">DayFlow</span>
             </div>
           </div>
           <NotificationBell />

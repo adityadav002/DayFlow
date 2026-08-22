@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Search, Phone, Video, MoreVertical, Send, MessageSquare, Trash2 } from 'lucide-react';
+import { Search, Phone, Video, MoreVertical, Send, MessageSquare, Trash2, ArrowLeft } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { joinMeeting } from '../redux/slices/meetingSlice';
 import useSocket from '../hooks/useSocket';
@@ -258,9 +258,9 @@ const MessagesPage = () => {
   }, [activeConversation, socket]);
 
   return (
-    <div className="flex h-full bg-white">
+    <div className="flex h-full bg-white overflow-hidden">
       {/* Conversations List Sidebar */}
-      <div className="w-80 border-r border-surface-200 flex flex-col">
+      <div className={`w-full md:w-80 border-r border-surface-200 flex-col flex-shrink-0 ${activeConversation ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-surface-200">
           <h2 className="text-lg font-semibold text-surface-900 mb-4">Messages</h2>
           <div className="relative">
@@ -374,8 +374,15 @@ const MessagesPage = () => {
       {activeConversation ? (
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="h-16 border-b border-surface-200 flex items-center justify-between px-6 bg-white flex-shrink-0">
+          <div className="h-16 border-b border-surface-200 flex items-center justify-between px-4 md:px-6 bg-white flex-shrink-0">
             <div className="flex items-center cursor-pointer" onClick={() => activeConversation.type === 'group' ? setIsGroupDetailsOpen(true) : null}>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setActiveConversation(null); }}
+                className="md:hidden mr-2 p-1.5 -ml-1 rounded-full hover:bg-surface-100 text-surface-600 transition-colors"
+                title="Back"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
               <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium mr-3 ${activeConversation.type === 'group' ? 'bg-indigo-100 text-indigo-700' : 'bg-primary-100 text-primary-700'}`}>
                 {activeConversation.type === 'group' ? (activeConversation.name?.charAt(0) || 'G') : (getOtherParticipant(activeConversation)?.name?.charAt(0))}
               </div>
@@ -417,7 +424,7 @@ const MessagesPage = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 bg-surface-50 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-surface-50 space-y-4">
             {messages.map((msg, index) => {
               const isMine = msg.sender._id === user._id || msg.sender === user._id;
               const isGroup = activeConversation.type === 'group';
@@ -473,7 +480,7 @@ const MessagesPage = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center bg-surface-50">
+        <div className="flex-1 hidden md:flex items-center justify-center bg-surface-50">
           <div className="text-center">
             <div className="h-16 w-16 bg-surface-200 rounded-full flex items-center justify-center mx-auto mb-4">
               <MessageSquare className="h-8 w-8 text-surface-400" />
