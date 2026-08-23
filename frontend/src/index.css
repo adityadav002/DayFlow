@@ -2,30 +2,179 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+:root {
+  /* Brand */
+  --color-primary:           #397D68;
+  --color-primary-dark:      #2D6455;
+  --color-primary-darker:    #224D41;
+  --color-primary-light:     rgba(57, 125, 104, 0.12);
+  --color-primary-subtle:    rgba(57, 125, 104, 0.06);
+
+  --color-midnight:          #18243A;
+  --color-midnight-80:       rgba(24, 36, 58, 0.8);
+  --color-midnight-60:       rgba(24, 36, 58, 0.6);
+  --color-midnight-20:       rgba(24, 36, 58, 0.2);
+
+  --color-taupe:             #B8A58C;
+  --color-taupe-light:       rgba(184, 165, 140, 0.15);
+  --color-taupe-subtle:      rgba(184, 165, 140, 0.08);
+
+  /* Neutral system */
+  --color-bg:                #F7F7F4;
+  --color-surface:           #FFFFFF;
+  --color-surface-raised:    #FAFAF8;
+  --color-surface-subtle:    #F2F4F1;
+  --color-border:            #E1E6E2;
+  --color-border-strong:     #CDD5CE;
+
+  /* Text */
+  --color-text:              #18243A;
+  --color-text-secondary:    #647080;
+  --color-text-muted:        #8A929A;
+  --color-text-inverse:      #FFFFFF;
+
+  /* Semantic */
+  --color-success:           #397D68;
+  --color-warning:           #B8A58C;
+  --color-error:             #D94F4F;
+  --color-info:              #4A7FA5;
+
+  /* Interactive */
+  --color-hover-bg:          #F1F5F2;
+  --color-active-bg:         rgba(57, 125, 104, 0.12);
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Typography scale */
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-md:   16px;
+  --text-lg:   18px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  34px;
+
+  /* Radius */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs:  0 1px 2px rgba(24, 36, 58, 0.04);
+  --shadow-sm:  0 2px 6px rgba(24, 36, 58, 0.06), 0 1px 2px rgba(24, 36, 58, 0.04);
+  --shadow-md:  0 4px 12px rgba(24, 36, 58, 0.08), 0 2px 4px rgba(24, 36, 58, 0.04);
+  --shadow-lg:  0 8px 24px rgba(24, 36, 58, 0.10), 0 3px 8px rgba(24, 36, 58, 0.06);
+  --shadow-xl:  0 16px 40px rgba(24, 36, 58, 0.12), 0 6px 14px rgba(24, 36, 58, 0.07);
+
+  /* Animations */
+  --duration-fast:    120ms;
+  --duration-normal:  200ms;
+  --duration-slow:    300ms;
+  --duration-slower:  400ms;
+  --ease-out:         cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out:      cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 @layer base {
   body {
-    @apply bg-surface-50 text-surface-900 font-sans antialiased;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer components {
+  /* Button overrides based on new tokens will be inside Button.jsx for full React-based interactivity, or here */
   .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 150ms var(--ease-out);
   }
+  
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+    transition: transform 100ms var(--ease-out);
+  }
+
   .btn-primary {
-    @apply bg-primary-600 text-white hover:bg-primary-700 shadow-sm;
+    background-color: var(--color-primary);
+    color: var(--color-text-inverse);
   }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+  }
+
   .btn-secondary {
-    @apply bg-surface-100 text-surface-900 hover:bg-surface-200 border border-surface-200;
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
   }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-hover-bg);
+  }
+
   .btn-ghost {
-    @apply hover:bg-surface-100 hover:text-surface-900;
+    background-color: transparent;
+    color: var(--color-primary);
   }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--color-primary-subtle);
+  }
+
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700 shadow-sm;
+    background-color: var(--color-error);
+    color: var(--color-text-inverse);
   }
+  .btn-danger:hover:not(:disabled) {
+    background-color: #BB3E3E;
+  }
+
   .input-field {
-    @apply flex h-10 w-full rounded-md border border-surface-300 bg-white px-3 py-2 text-sm placeholder:text-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex w-full border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border-color: var(--color-border);
+    font-size: 14px;
+    color: var(--color-text);
+  }
+  .input-field:focus {
+    border-color: var(--color-primary);
+    --tw-ring-color: var(--color-primary);
+  }
+  
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-xs);
+    transition: box-shadow 200ms var(--ease-out), border-color 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .card:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border-strong);
+  }
+  .card.interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -34,15 +183,24 @@
   width: 6px;
   height: 6px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-surface-300 rounded-full;
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-muted);
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-surface-400;
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #E1E6E2 25%, #EEF0ED 50%, #E1E6E2 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
 }

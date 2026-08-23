@@ -297,7 +297,7 @@ const MessagesPage = () => {
                 className={`flex items-center p-4 cursor-pointer hover:bg-surface-50 transition-colors border-b border-surface-100 ${activeConversation?._id === conv._id ? 'bg-primary-50' : ''}`}
               >
                 <div className="relative">
-                  <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium ${isGroup ? 'bg-indigo-100 text-indigo-700' : 'bg-primary-100 text-primary-700'}`}>
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium ${isGroup ? 'bg-accent-100 text-accent-700' : 'bg-primary-100 text-primary-700'}`}>
                     {avatarChar}
                   </div>
                   {isOnline && (
@@ -383,7 +383,7 @@ const MessagesPage = () => {
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
-              <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium mr-3 ${activeConversation.type === 'group' ? 'bg-indigo-100 text-indigo-700' : 'bg-primary-100 text-primary-700'}`}>
+              <div className={`h-10 w-10 rounded-full flex items-center justify-center font-medium mr-3 ${activeConversation.type === 'group' ? 'bg-accent-100 text-accent-700' : 'bg-primary-100 text-primary-700'}`}>
                 {activeConversation.type === 'group' ? (activeConversation.name?.charAt(0) || 'G') : (getOtherParticipant(activeConversation)?.name?.charAt(0))}
               </div>
               <div>
@@ -439,13 +439,13 @@ const MessagesPage = () => {
               return (
                 <div key={msg._id} className={`flex ${isMine ? 'justify-end' : 'justify-start'} mb-1`}>
                   {showAvatar && (
-                    <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium mr-2 self-end mb-1 ${isSameSenderAsPrev ? 'invisible' : 'bg-indigo-100 text-indigo-700'}`}>
+                    <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium mr-2 self-end mb-1 ${isSameSenderAsPrev ? 'invisible' : 'bg-accent-100 text-accent-700'}`}>
                       {msg.sender?.name?.charAt(0) || '?'}
                     </div>
                   )}
                   <div className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${isMine ? 'bg-primary-600 text-white rounded-br-sm' : 'bg-white border border-surface-200 text-surface-900 rounded-bl-sm'}`}>
                     {showName && (
-                      <span className="text-xs font-bold text-indigo-600 mb-0.5 block">
+                      <span className="text-xs font-bold text-accent-600 mb-0.5 block">
                         {msg.sender?.name || 'Unknown'}
                       </span>
                     )}

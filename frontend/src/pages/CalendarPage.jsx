@@ -242,57 +242,56 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="flex h-full flex-col bg-surface-50 p-6 space-y-6">
-      {/* Calendar Header Panel */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-surface-200 shadow-sm shrink-0">
-        <div className="flex items-center space-x-3">
-          <CalendarIcon className="h-6 w-6 text-primary-600" />
-          <h1 className="text-xl font-bold text-surface-900">{getHeaderDateLabel()}</h1>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Prev/Today/Next navigation buttons */}
-          <div className="flex border border-surface-200 rounded-lg overflow-hidden">
+    <div className="flex h-full flex-col bg-surface-50 custom-scrollbar overflow-hidden">
+      {/* Calendar Header */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 shrink-0 border-b border-surface-200 bg-white z-10">
+        <div className="flex items-center gap-4">
+          <h1 className="text-[28px] font-medium text-surface-900 tracking-tight">Calendar</h1>
+          
+          {/* Navigation Controls */}
+          <div className="flex items-center border border-surface-200 rounded-[10px] overflow-hidden ml-4 shadow-sm bg-white">
             <button 
               onClick={handlePrev}
-              className="p-2 bg-white hover:bg-surface-50 border-r border-surface-200 text-surface-600 transition-colors"
+              className="p-2 hover:bg-surface-50 border-r border-surface-200 text-surface-600 transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <button 
-              onClick={handleToday}
-              className="px-3 py-1 bg-white hover:bg-surface-50 text-xs font-semibold border-r border-surface-200 text-surface-600 transition-colors"
-            >
-              Today
-            </button>
+            <span className="px-5 py-2 text-[14px] font-medium text-surface-900 min-w-[160px] text-center">
+              {getHeaderDateLabel()}
+            </span>
             <button 
               onClick={handleNext}
-              className="p-2 bg-white hover:bg-surface-50 text-surface-600 transition-colors"
+              className="p-2 hover:bg-surface-50 border-l border-surface-200 text-surface-600 transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
+          
+          <Button size="sm" variant="secondary" onClick={handleToday} className="h-9">
+            Today
+          </Button>
+        </div>
 
-          {/* Calendar Scope Selector */}
-          <div className="flex items-center space-x-2 border border-surface-200 rounded-lg bg-white px-2 py-1">
-            <Users className="h-4 w-4 text-surface-400" />
+        <div className="flex items-center gap-4">
+          {/* Filters */}
+          <div className="flex items-center space-x-2 border border-surface-200 rounded-[10px] bg-white px-2 py-1 shadow-sm h-9">
+            <Users className="h-4 w-4 text-surface-400 ml-1" />
             <select
-              className="text-xs font-semibold bg-transparent border-none text-surface-600 focus:outline-none focus:ring-0 cursor-pointer"
+              className="text-[13px] font-medium bg-transparent border-none text-surface-600 focus:outline-none focus:ring-0 cursor-pointer"
               value={selectedTeamId}
               onChange={(e) => setSelectedTeamId(e.target.value)}
             >
-              <option value="">Personal Calendar</option>
+              <option value="">Personal</option>
               {teams.map(t => (
-                <option key={t._id} value={t._id}>Team: {t.name}</option>
+                <option key={t._id} value={t._id}>{t.name}</option>
               ))}
             </select>
           </div>
 
-          {/* Context Filter Dropdown */}
-          <div className="flex items-center space-x-2 border border-surface-200 rounded-lg bg-white px-2 py-1">
-            <ListFilter className="h-4 w-4 text-surface-400" />
+          <div className="flex items-center space-x-2 border border-surface-200 rounded-[10px] bg-white px-2 py-1 shadow-sm h-9">
+            <ListFilter className="h-4 w-4 text-surface-400 ml-1" />
             <select
-              className="text-xs font-semibold bg-transparent border-none text-surface-600 focus:outline-none focus:ring-0"
+              className="text-[13px] font-medium bg-transparent border-none text-surface-600 focus:outline-none focus:ring-0 cursor-pointer"
               value={selectedContext}
               onChange={(e) => setSelectedContext(e.target.value)}
             >
@@ -300,33 +299,30 @@ const CalendarPage = () => {
               <option value="work">Work</option>
               <option value="personal">Personal</option>
               <option value="study">Study</option>
-              <option value="health">Health</option>
-              <option value="finance">Finance</option>
-              <option value="family">Family</option>
-              <option value="other">Other</option>
             </select>
           </div>
 
-          {/* Switch View Buttons */}
-          <div className="flex bg-surface-100 p-0.5 rounded-lg border border-surface-200">
-            {['month', 'week', 'day', 'agenda'].map((view) => (
+          {/* Segmented Control for Views */}
+          <div className="flex p-1 bg-surface-100 rounded-[10px] border border-surface-200 shadow-sm h-10">
+            {['month', 'week', 'day', 'agenda'].map((v) => (
               <button
-                key={view}
-                onClick={() => handleViewChange(view)}
-                className={`px-3 py-1 text-xs font-bold rounded-md capitalize transition-all ${
-                  currentView === view
-                    ? 'bg-white text-primary-600 shadow-sm'
-                    : 'text-surface-600 hover:text-surface-900'
-                }`}
+                key={v}
+                onClick={() => dispatch(setCurrentView(v))}
+                className={cn(
+                  'px-4 py-1 text-[13px] font-medium rounded-md capitalize transition-all duration-200',
+                  currentView === v 
+                    ? 'bg-white text-primary-600 shadow-sm' 
+                    : 'text-surface-600 hover:text-surface-900 hover:bg-surface-200/50'
+                )}
               >
-                {view}
+                {v}
               </button>
             ))}
           </div>
 
-          <Button size="sm" onClick={() => handleDateClick(new Date())}>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Create
+          <Button onClick={() => handleDateClick(new Date())} className="h-10">
+            <Plus className="mr-2 h-4 w-4" />
+            New Event
           </Button>
         </div>
       </header>

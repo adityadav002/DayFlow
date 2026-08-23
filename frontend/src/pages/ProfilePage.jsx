@@ -79,19 +79,21 @@ const ProfilePage = () => {
   if (!user) return null;
 
   return (
-    <div className="flex h-full flex-col bg-[#F6F7F5] overflow-auto custom-scrollbar">
+    <div className="flex h-full flex-col bg-surface-50 overflow-auto custom-scrollbar">
       {/* Header Area */}
-      <div className="h-48 w-full bg-[#18243A]">
-        <div className="mx-auto h-full max-w-5xl px-6 lg:px-8 relative">
-          <div className="absolute -bottom-16 left-6 lg:left-8 flex items-end space-x-6">
-            <div className="relative group">
-              <div className="rounded-full border-4 border-[#F6F7F5] bg-white shadow-md">
-                <Avatar user={user} size="2xl" className="h-32 w-32 text-4xl" />
+      <div className="w-full bg-surface-900 border-b border-surface-800 shrink-0">
+        <div className="mx-auto w-full max-w-5xl px-6 lg:px-8 py-6 md:py-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-5">
+            
+            {/* Avatar block */}
+            <div className="relative group shrink-0 self-start md:self-center">
+              <div className="rounded-full border-4 border-surface-900 shadow-sm ring-1 ring-surface-700 overflow-hidden bg-surface-800">
+                <Avatar user={user} size="2xl" className="h-28 w-28 text-4xl" />
               </div>
 
               {/* Hover overlay for changing avatar */}
               <div
-                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white m-1"
+                className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity text-white m-1"
                 onClick={() => fileInputRef.current?.click()}
               >
                 {isUploading ? (
@@ -112,135 +114,164 @@ const ProfilePage = () => {
               />
             </div>
 
-            <div className="mb-2 pb-1 text-[#18243A]">
-              <h1 className="text-3xl font-bold">{user.name}</h1>
-              {user.jobTitle && (
-                <p className="text-[#68737A] font-medium mt-1">{user.jobTitle}</p>
+            {/* Identity Info */}
+            <div className="flex-1 min-w-0">
+              <h1 className="text-[28px] md:text-3xl font-medium text-white tracking-tight leading-tight truncate">
+                {user.name}
+              </h1>
+              {(user.jobTitle || user.department || user.location) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-surface-400">
+                  {user.jobTitle && (
+                    <span className="text-[15px] font-medium text-surface-200">{user.jobTitle}</span>
+                  )}
+                  {user.department && (
+                    <span className="text-[14px] flex items-center">
+                      <span className="w-1 h-1 rounded-full bg-surface-600 mr-2" />
+                      {user.department}
+                    </span>
+                  )}
+                  {user.location && (
+                    <span className="text-[14px] flex items-center">
+                      <MapPin className="h-3.5 w-3.5 mr-1.5 text-surface-500" />
+                      {user.location}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
-          </div>
 
-          <div className="absolute bottom-4 right-6 lg:right-8">
-            <Button
-              className="bg-[#397D68] hover:bg-[#2d6352] text-white border-transparent"
-              onClick={() => {
-                setFormData({
-                  name: user.name || '',
-                  jobTitle: user.jobTitle || '',
-                  department: user.department || '',
-                  location: user.location || '',
-                  bio: user.bio || '',
-                  phone: user.phone || '',
-                  linkedin: user.linkedin || '',
-                  github: user.github || ''
-                });
-                setIsEditModalOpen(true);
-              }}
-            >
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
+            {/* Actions */}
+            <div className="shrink-0 pt-2 md:pt-0">
+              <Button
+                className="w-full md:w-auto"
+                onClick={() => {
+                  setFormData({
+                    name: user.name || '',
+                    jobTitle: user.jobTitle || '',
+                    department: user.department || '',
+                    location: user.location || '',
+                    bio: user.bio || '',
+                    phone: user.phone || '',
+                    linkedin: user.linkedin || '',
+                    github: user.github || ''
+                  });
+                  setIsEditModalOpen(true);
+                }}
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            </div>
+
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto w-full max-w-5xl px-6 lg:px-8 mt-24 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="mx-auto w-full max-w-5xl px-6 lg:px-8 py-6 md:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Left Column - About & Bio */}
-          <div className="md:col-span-2 space-y-6">
-            <div className="rounded-xl border border-[#E2E6E3] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-[#18243A] mb-4">About</h2>
-              {user.bio ? (
-                <p className="text-[#18243A] leading-relaxed whitespace-pre-wrap">
-                  {user.bio}
-                </p>
-              ) : (
-                <div className="rounded-lg bg-[#F6F7F5] p-6 text-center border border-dashed border-[#E2E6E3]">
-                  <p className="text-[#68737A] text-sm">No professional bio added yet.</p>
-                  <Button variant="outline" size="sm" className="mt-3" onClick={() => setIsEditModalOpen(true)}>
-                    Add Bio
-                  </Button>
-                </div>
-              )}
+          <div className="md:col-span-2 space-y-4">
+            <div className="card bg-surface-900 border-surface-800">
+              <div className="p-5">
+                <h2 className="text-[16px] font-bold text-white mb-3">About</h2>
+                {user.bio ? (
+                  <p className="text-[14px] text-surface-300 leading-relaxed whitespace-pre-wrap">
+                    {user.bio}
+                  </p>
+                ) : (
+                  <div className="rounded-[12px] bg-surface-800 p-5 text-center border border-dashed border-surface-700">
+                    <p className="text-surface-400 text-[13px]">No professional bio added yet.</p>
+                    <Button variant="secondary" size="sm" className="mt-3 text-[13px] h-8 bg-surface-700 text-white hover:bg-surface-600 border-surface-600" onClick={() => setIsEditModalOpen(true)}>
+                      Add Bio
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Recent Activity or Teams (Placeholder for future) */}
-            <div className="rounded-xl border border-[#E2E6E3] bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-[#18243A] mb-4">Professional Information</h2>
-              <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                <div>
-                  <p className="text-[#68737A] mb-1 font-medium text-xs uppercase tracking-wider">Role</p>
-                  <p className="text-[#18243A] font-medium">{user.jobTitle || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-[#68737A] mb-1 font-medium text-xs uppercase tracking-wider">Department</p>
-                  <p className="text-[#18243A] font-medium">{user.department || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-[#68737A] mb-1 font-medium text-xs uppercase tracking-wider">Joined</p>
-                  <p className="text-[#18243A] font-medium">{new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</p>
+            {/* Professional Information */}
+            <div className="card bg-surface-900 border-surface-800">
+              <div className="p-5">
+                <h2 className="text-[16px] font-bold text-white mb-4">Professional Information</h2>
+                <div className="grid grid-cols-2 gap-y-5 gap-x-6">
+                  <div>
+                    <p className="text-surface-500 mb-1 font-medium text-[11px] uppercase tracking-wider">Role</p>
+                    <p className="text-white font-medium text-[14px]">{user.jobTitle || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-surface-500 mb-1 font-medium text-[11px] uppercase tracking-wider">Department</p>
+                    <p className="text-white font-medium text-[14px]">{user.department || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-surface-500 mb-1 font-medium text-[11px] uppercase tracking-wider">Joined</p>
+                    <p className="text-white font-medium text-[14px]">{new Date(user.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' })}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Column - Contact & Details */}
-          <div className="space-y-6">
-            <div className="rounded-xl border border-[#E2E6E3] bg-white p-6 shadow-sm">
-              <h2 className="text-sm font-bold text-[#18243A] uppercase tracking-wider mb-4 border-b border-[#E2E6E3] pb-2">Contact Details</h2>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <Mail className="h-4 w-4 text-[#B8A58C] mt-0.5 mr-3 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs text-[#68737A] font-medium">Email</p>
-                    <p className="text-sm text-[#18243A] truncate">{user.email}</p>
+          <div className="space-y-4">
+            <div className="card bg-surface-900 border-surface-800">
+              <div className="p-5">
+                <h2 className="text-[12px] font-bold text-surface-500 uppercase tracking-wider mb-4 border-b border-surface-800 pb-2">Contact Details</h2>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <Mail className="h-[16px] w-[16px] text-[#B8A58C] mt-0.5 mr-3 shrink-0" strokeWidth={2} />
+                    <div className="min-w-0">
+                      <p className="text-[11px] text-surface-500 font-medium">Email</p>
+                      <p className="text-[13px] font-medium text-white truncate mt-0.5">{user.email}</p>
+                    </div>
                   </div>
+
+                  {user.phone && (
+                    <div className="flex items-start">
+                      <Phone className="h-[16px] w-[16px] text-[#B8A58C] mt-0.5 mr-3 shrink-0" strokeWidth={2} />
+                      <div>
+                        <p className="text-[11px] text-surface-500 font-medium">Phone</p>
+                        <p className="text-[13px] font-medium text-white mt-0.5">{user.phone}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {user.location && (
+                    <div className="flex items-start">
+                      <MapPin className="h-[16px] w-[16px] text-[#B8A58C] mt-0.5 mr-3 shrink-0" strokeWidth={2} />
+                      <div>
+                        <p className="text-[11px] text-surface-500 font-medium">Location</p>
+                        <p className="text-[13px] font-medium text-white mt-0.5">{user.location}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {user.phone && (
-                  <div className="flex items-start">
-                    <Phone className="h-4 w-4 text-[#B8A58C] mt-0.5 mr-3 shrink-0" />
-                    <div>
-                      <p className="text-xs text-[#68737A] font-medium">Phone</p>
-                      <p className="text-sm text-[#18243A]">{user.phone}</p>
-                    </div>
-                  </div>
-                )}
-
-                {user.location && (
-                  <div className="flex items-start">
-                    <MapPin className="h-4 w-4 text-[#B8A58C] mt-0.5 mr-3 shrink-0" />
-                    <div>
-                      <p className="text-xs text-[#68737A] font-medium">Location</p>
-                      <p className="text-sm text-[#18243A]">{user.location}</p>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
             {(user.linkedin || user.github) && (
-              <div className="rounded-xl border border-[#E2E6E3] bg-white p-6 shadow-sm">
-                <h2 className="text-sm font-bold text-[#18243A] uppercase tracking-wider mb-4 border-b border-[#E2E6E3] pb-2">Links</h2>
-                <div className="space-y-4">
-                  {user.linkedin && (
-                    <div className="flex items-center">
-                      <Link className="h-4 w-4 text-[#B8A58C] mr-3 shrink-0" />
-                      <a href={user.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-[#397D68] hover:underline truncate">
-                        LinkedIn Profile
-                      </a>
-                    </div>
-                  )}
-                  {user.github && (
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 text-[#B8A58C] mr-3 shrink-0" />
-                      <a href={user.github} target="_blank" rel="noopener noreferrer" className="text-sm text-[#397D68] hover:underline truncate">
-                        GitHub Profile
-                      </a>
-                    </div>
-                  )}
+              <div className="card bg-surface-900 border-surface-800">
+                <div className="p-5">
+                  <h2 className="text-[12px] font-bold text-surface-500 uppercase tracking-wider mb-4 border-b border-surface-800 pb-2">Professional Links</h2>
+                  <div className="space-y-3">
+                    {user.linkedin && (
+                      <div className="flex items-center">
+                        <Link className="h-[16px] w-[16px] text-[#B8A58C] mr-3 shrink-0" />
+                        <a href={user.linkedin} target="_blank" rel="noopener noreferrer" className="text-[13px] font-medium text-primary-400 hover:text-primary-300 hover:underline truncate">
+                          LinkedIn Profile
+                        </a>
+                      </div>
+                    )}
+                    {user.github && (
+                      <div className="flex items-center">
+                        <Globe className="h-[16px] w-[16px] text-[#B8A58C] mr-3 shrink-0" />
+                        <a href={user.github} target="_blank" rel="noopener noreferrer" className="text-[13px] font-medium text-primary-400 hover:text-primary-300 hover:underline truncate">
+                          GitHub Profile
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -251,106 +282,106 @@ const ProfilePage = () => {
 
       {/* Edit Profile Modal */}
       <Modal isOpen={isEditModalOpen} onClose={() => !isSubmitting && setIsEditModalOpen(false)} title="Edit Profile">
-        <form onSubmit={handleSaveProfile} className="mt-4 space-y-4">
+        <form onSubmit={handleSaveProfile} className="mt-4 space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-[#18243A] mb-1">Full Name *</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">Full Name *</label>
               <input
                 type="text"
                 name="name"
                 required
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#18243A] mb-1">Job Title</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">Job Title</label>
               <input
                 type="text"
                 name="jobTitle"
                 value={formData.jobTitle}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#18243A] mb-1">Department</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">Department</label>
               <input
                 type="text"
                 name="department"
                 value={formData.department}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#18243A] mb-1">Location</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">Location</label>
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#18243A] mb-1">Phone Number</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">Phone Number</label>
               <input
                 type="text"
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-[#18243A] mb-1">Professional Bio</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">Professional Bio</label>
               <textarea
                 name="bio"
                 rows={3}
                 value={formData.bio}
                 onChange={handleInputChange}
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68] resize-none"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white resize-none"
                 placeholder="A short summary of your professional background..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#18243A] mb-1">LinkedIn URL</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">LinkedIn URL</label>
               <input
                 type="url"
                 name="linkedin"
                 value={formData.linkedin}
                 onChange={handleInputChange}
                 placeholder="https://linkedin.com/in/..."
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#18243A] mb-1">GitHub URL</label>
+              <label className="block text-[13px] font-medium text-surface-900 mb-1.5">GitHub URL</label>
               <input
                 type="url"
                 name="github"
                 value={formData.github}
                 onChange={handleInputChange}
                 placeholder="https://github.com/..."
-                className="w-full rounded-md border border-[#E2E6E3] px-3 py-2 text-sm focus:border-[#397D68] focus:ring-1 focus:ring-[#397D68]"
+                className="w-full rounded-md border border-surface-200 px-3 py-2 text-[14px] focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors bg-surface-50 focus:bg-white"
               />
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t border-[#E2E6E3] mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>
+          <div className="flex justify-end space-x-3 pt-5 border-t border-surface-200 mt-6">
+            <Button type="button" variant="secondary" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !formData.name.trim()} className="bg-[#397D68] hover:bg-[#2d6352] text-white border-transparent">
+            <Button type="submit" disabled={isSubmitting || !formData.name.trim()}>
               {isSubmitting ? 'Saving...' : 'Save Profile'}
             </Button>
           </div>

@@ -24,7 +24,8 @@ import TaskCard from '../components/boards/TaskCard';
 import CreateTaskModal from '../components/boards/CreateTaskModal';
 import ShareBoardModal from '../components/boards/ShareBoardModal';
 import Modal from '../components/common/Modal';
-import { Plus, Users, Settings, Edit2, Trash2 } from 'lucide-react';
+import Avatar from '../components/common/Avatar';
+import { Plus, Users, Settings, Edit2, Trash2, Crown } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const COLUMNS = ['Backlog', 'Todo', 'In Progress', 'Review', 'Blocked', 'Done'];
@@ -314,18 +315,16 @@ const BoardPage = ({ boardId: propBoardId }) => {
     <div className="flex h-full flex-col bg-surface-50">
       {/* Board Header (Only for standalone boards) */}
       {!propBoardId && (
-        <header className="flex shrink-0 items-center justify-between border-b border-surface-200 bg-white px-6 py-4">
+        <header className="flex shrink-0 items-center justify-between border-b border-surface-200 bg-white px-6 md:px-8 py-5 z-10 relative">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold text-surface-900">{currentBoard.title}</h1>
-            <div className="flex -space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary-100 text-xs font-medium text-primary-700">
-                {currentBoard.createdBy.name?.charAt(0) || 'U'}
-              </div>
+            <h1 className="text-[28px] font-medium text-surface-900 tracking-tight">{currentBoard.title}</h1>
+            <div className="flex -space-x-2 border-l border-surface-200 pl-4 ml-4">
+              <Avatar user={currentBoard.createdBy} size="sm" className="ring-2 ring-white z-10 shadow-sm" />
             </div>
             <Button 
-              variant="ghost" 
+              variant="secondary" 
               size="sm" 
-              className="text-surface-500"
+              className="text-[13px] h-9 ml-2"
               onClick={() => setIsShareModalOpen(true)}
             >
               <Users className="mr-2 h-4 w-4" />
@@ -337,13 +336,13 @@ const BoardPage = ({ boardId: propBoardId }) => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-8 px-2.5 text-xs text-surface-500"
+                className="h-9 px-3 text-[13px] text-surface-500 hover:text-surface-900"
                 onClick={() => {
                   setEditBoardTitle(currentBoard.title);
                   setIsSettingsModalOpen(true);
                 }}
               >
-                <Settings className="mr-1.5 h-3.5 w-3.5" />
+                <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Button>
             )}
@@ -352,23 +351,23 @@ const BoardPage = ({ boardId: propBoardId }) => {
       )}
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-surface-200 bg-surface-50 px-6 py-2 shrink-0">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-surface-200 bg-white px-6 md:px-8 py-3 shrink-0 z-10 relative">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Search Input */}
           <div className="relative">
             <input
               type="text"
               placeholder="Filter by title..."
-              className="rounded-lg border border-surface-300 bg-white px-3 py-1.5 pl-8 text-xs focus:outline-none focus:ring-1 focus:ring-primary-500 w-44"
+              className="rounded-md border border-surface-200 bg-surface-50 px-3 py-1.5 pl-8 text-[13px] focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 w-48 transition-all"
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
             />
-            <svg xmlns="http://www.w3.org/2500/svg" className="absolute left-2.5 top-2 h-4 w-4 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <svg xmlns="http://www.w3.org/2500/svg" className="absolute left-2.5 top-[7px] h-4 w-4 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
 
           {/* Priority Filter */}
           <select
-            className="rounded-lg border border-surface-300 bg-white px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary-500 text-surface-700 cursor-pointer"
+            className="rounded-md border border-surface-200 bg-surface-50 px-3 py-1.5 text-[13px] font-medium focus:outline-none focus:ring-1 focus:ring-primary-500 text-surface-700 cursor-pointer hover:bg-surface-100 transition-colors"
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
           >
@@ -516,6 +515,21 @@ const BoardPage = ({ boardId: propBoardId }) => {
               </div>
             </div>
           </form>
+
+          {/* Ownership Information */}
+          <div className="border-t border-surface-200 pt-4">
+            <h3 className="text-sm font-semibold text-surface-800 mb-3">Ownership</h3>
+            <div className="flex items-center space-x-3 p-3 bg-surface-50 rounded-lg border border-surface-200">
+              <Avatar user={currentBoard.createdBy} size="md" />
+              <div>
+                <p className="text-sm font-medium text-surface-900 flex items-center">
+                  {currentBoard.createdBy.name}
+                  <Crown className="ml-1.5 h-3.5 w-3.5 text-amber-500" />
+                </p>
+                <p className="text-xs text-surface-500">Board Creator & Owner</p>
+              </div>
+            </div>
+          </div>
 
           {/* Danger Zone */}
           <div className="border-t border-surface-200 pt-4">

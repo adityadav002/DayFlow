@@ -6,11 +6,11 @@ const Avatar = ({ user, size = 'md', className, onClick }) => {
 
   // Determine dimensions based on size
   const sizeClasses = {
-    sm: 'h-6 w-6 text-[10px]',
-    md: 'h-8 w-8 text-xs',
-    lg: 'h-12 w-12 text-sm',
-    xl: 'h-24 w-24 text-2xl',
-    '2xl': 'h-32 w-32 text-4xl'
+    xs: 'h-6 w-6 text-[10px]', // 24px
+    sm: 'h-8 w-8 text-[11px]', // 32px
+    md: 'h-10 w-10 text-xs', // 40px
+    lg: 'h-12 w-12 text-sm', // 48px
+    xl: 'h-16 w-16 text-lg', // 64px
   };
 
   const containerClasses = cn(
@@ -38,7 +38,7 @@ const Avatar = ({ user, size = 'md', className, onClick }) => {
       )}
       
       {user.isOnline && (
-        <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white" />
+        <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-primary-500 ring-2 ring-white" />
       )}
     </div>
   );

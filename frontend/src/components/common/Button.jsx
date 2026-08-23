@@ -22,16 +22,22 @@ const Button = React.forwardRef(({
           'btn-secondary': variant === 'secondary',
           'btn-ghost': variant === 'ghost',
           'btn-danger': variant === 'danger',
-          'h-8 px-3 text-xs': size === 'sm',
-          'h-10 px-4 py-2': size === 'md',
-          'h-12 px-8 text-lg': size === 'lg',
+          'h-8 px-3 text-[13px]': size === 'sm', // 32px
+          'h-9 px-4': size === 'md', // 36px
+          'h-10 px-6': size === 'lg', // 40px
         },
         className
       )}
       {...props}
     >
-      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-      {children}
+      {isLoading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <span className="opacity-70">{children}</span>
+        </>
+      ) : (
+        children
+      )}
     </button>
   );
 });

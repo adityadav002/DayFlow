@@ -50,23 +50,38 @@ const AppLayout = () => {
       
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile Header */}
-        <header className="flex h-14 items-center justify-between border-b border-surface-200 bg-white px-4 md:hidden">
+        {/* Global Header */}
+        <header className="flex h-14 items-center justify-between border-b border-surface-200 bg-white px-4 md:px-6 shrink-0 z-10">
           <div className="flex items-center">
             <button 
               onClick={() => dispatch(toggleSidebar())}
-              className="mr-4 rounded-md p-2 hover:bg-surface-100 flex items-center justify-center"
+              className="mr-4 rounded-md p-2 hover:bg-surface-100 flex items-center justify-center md:hidden"
             >
               <Menu className="h-5 w-5 text-surface-600" />
             </button>
-            <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 rounded-lg bg-primary-600 flex items-center justify-center">
+            <div className="flex items-center space-x-2 md:hidden">
+              <div className="h-8 w-8 rounded-lg bg-primary-500 shadow-md flex items-center justify-center">
                 <span className="font-bold text-white">D</span>
               </div>
               <span className="font-semibold text-surface-900">DayFlow</span>
             </div>
+            {/* Desktop spacer */}
+            <div className="hidden md:block"></div>
           </div>
-          <NotificationBell />
+          
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('toggle-global-search'))}
+              className="hidden md:flex items-center justify-between rounded-full border border-surface-200 bg-surface-50 hover:bg-surface-100 px-4 py-1.5 text-xs text-surface-500 transition-all focus:outline-none w-64"
+            >
+              <span className="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2500/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span>Search anywhere...</span>
+              </span>
+              <kbd className="bg-surface-200 border border-surface-300 px-1.5 py-0.5 rounded text-[10px] text-surface-600 font-mono">Ctrl+K</kbd>
+            </button>
+            <NotificationBell align="right" />
+          </div>
         </header>
 
         {/* Main Content */}

@@ -5,7 +5,8 @@ import { addMemberToBoard, removeMemberFromBoard } from '../../redux/slices/boar
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
-import { Trash2, UserPlus } from 'lucide-react';
+import Avatar from '../common/Avatar';
+import { Trash2, UserPlus, Crown } from 'lucide-react';
 
 const ShareBoardModal = ({ isOpen, onClose, boardId }) => {
   const dispatch = useDispatch();
@@ -86,9 +87,7 @@ const ShareBoardModal = ({ isOpen, onClose, boardId }) => {
               return (
                 <li key={memberId} className="flex items-center justify-between p-3">
                   <div className="flex items-center space-x-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-sm font-medium text-primary-700">
-                      {member.name ? member.name.charAt(0).toUpperCase() : 'U'}
-                    </div>
+                    <Avatar user={member} size="sm" />
                     <div>
                       <p className="text-sm font-medium text-surface-900">{member.name || 'Unknown User'}</p>
                       <p className="text-xs text-surface-500">{member.email || 'Email not available'}</p>
@@ -97,7 +96,8 @@ const ShareBoardModal = ({ isOpen, onClose, boardId }) => {
                   
                   <div className="flex items-center space-x-2">
                     {isMemberOwner && (
-                      <span className="rounded-full bg-surface-100 px-2.5 py-0.5 text-xs font-medium text-surface-600">
+                      <span className="flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                        <Crown className="mr-1 h-3 w-3 text-amber-600" />
                         Owner
                       </span>
                     )}

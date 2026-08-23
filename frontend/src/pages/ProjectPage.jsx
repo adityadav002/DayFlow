@@ -15,7 +15,10 @@ import { format } from 'date-fns';
 import { smartDueDate } from '../utils/helpers';
 import Modal from '../components/common/Modal';
 import { fetchProjects } from '../redux/slices/projectSlice';
-import { Edit2 } from 'lucide-react';
+import { Edit2, Settings, Crown } from 'lucide-react';
+import Avatar from '../components/common/Avatar';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/common/Card';
+import { cn } from '../utils/helpers';
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -39,7 +42,7 @@ const ProjectPage = () => {
   const [meetingDate, setMeetingDate] = useState('');
   const [schedulingMeeting, setSchedulingMeeting] = useState(false);
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editProjectName, setEditProjectName] = useState('');
   const [editProjectDesc, setEditProjectDesc] = useState('');
@@ -180,7 +183,7 @@ const ProjectPage = () => {
         description: editProjectDesc
       });
       toast.success('Project updated successfully');
-      setIsEditModalOpen(false);
+      setIsSettingsModalOpen(false);
       dispatch(fetchProjectById(projectId));
       if (currentProject.workspace) {
         dispatch(fetchProjects({ workspace: currentProject.workspace }));
@@ -225,18 +228,18 @@ const ProjectPage = () => {
   return (
     <div className="flex h-full flex-col bg-surface-50">
       {/* Project Header Banner */}
-      <header className="shrink-0 bg-white border-b border-surface-200 px-4 md:px-6 pt-4 md:pt-5" style={{ borderTopWidth: '4px', ...borderStyle }}>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4">
+      <header className="shrink-0 bg-white border-b border-surface-200 px-6 md:px-8 pt-6 relative overflow-hidden" style={{ ...borderStyle, borderTopWidth: '4px' }}>
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 pb-6 relative z-10">
           <div>
-            <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg text-white font-bold uppercase shadow-sm" style={{ backgroundColor: currentProject.color || '#0ea5e9' }}>
-                <FolderOpen className="h-5 w-5" />
+            <div className="flex items-center space-x-3 mb-1">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] text-white font-bold uppercase shadow-sm" style={{ backgroundColor: currentProject.color || '#397D68' }}>
+                <FolderOpen className="h-6 w-6" strokeWidth={1.5} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-surface-900">{currentProject.name}</h1>
-                <p className="text-xs text-surface-500">
+                <h1 className="text-[28px] font-medium text-surface-900 tracking-tight leading-tight">{currentProject.name}</h1>
+                <p className="text-[14px] text-surface-500 mt-0.5">
                   Status:{' '}
-                  <span className="font-semibold uppercase tracking-wide text-primary-600">
+                  <span className="font-medium tracking-wide" style={{ color: currentProject.color || '#397D68' }}>
                     {currentProject.status}
                   </span>
                 </p>
@@ -246,52 +249,44 @@ const ProjectPage = () => {
           {canManageMembers && (
             <div className="flex items-center space-x-2">
               <Button 
-                variant="outline" 
-                className="h-9 px-3 text-sm"
+                variant="secondary" 
+                className="h-9 px-4 text-[13px]"
                 onClick={() => {
                   setEditProjectName(currentProject.name);
                   setEditProjectDesc(currentProject.description);
-                  setIsEditModalOpen(true);
+                  setIsSettingsModalOpen(true);
                 }}
               >
-                <Edit2 className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button 
-                variant="outline" 
-                className="h-9 px-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
-                onClick={() => setIsDeleteModalOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
               </Button>
             </div>
           )}
         </div>
 
         {/* Tab Controls */}
-        <div className="flex space-x-6 border-t border-surface-100 overflow-x-auto custom-scrollbar">
+        <div className="flex space-x-8 overflow-x-auto custom-scrollbar relative z-10 px-2 -mx-2">
           {[
-            { id: 'overview', label: 'Overview', icon: Info },
-            { id: 'board', label: 'Kanban Board', icon: Layout },
-            { id: 'members', label: 'Members', icon: Users },
-            { id: 'analytics', label: 'Analytics', icon: BarChart2 },
-            { id: 'meetings', label: 'Meetings', icon: Video },
+            { id: 'overview', label: 'Overview' },
+            { id: 'board', label: 'Kanban Board' },
+            { id: 'members', label: 'Members' },
+            { id: 'analytics', label: 'Analytics' },
+            { id: 'meetings', label: 'Meetings' },
           ].map((tab) => {
-            const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-3 text-sm font-medium border-b-2 transition-all whitespace-nowrap shrink-0 ${
-                  isActive
-                    ? 'border-primary-600 text-primary-600'
-                    : 'border-transparent text-surface-500 hover:text-surface-900'
-                }`}
+                className={cn(
+                  'py-3 text-[14px] font-medium transition-all whitespace-nowrap shrink-0 relative',
+                  isActive ? 'text-primary-600' : 'text-surface-500 hover:text-surface-900'
+                )}
               >
-                <Icon className="h-4 w-4" />
-                <span>{tab.label}</span>
+                {tab.label}
+                {isActive && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary-600 rounded-t-full" />
+                )}
               </button>
             );
           })}
@@ -299,104 +294,110 @@ const ProjectPage = () => {
       </header>
 
       {/* Tab Contents */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-surface-50">
         {activeTab === 'overview' && (
           <div className="p-4 md:p-6 max-w-4xl space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               {/* Project Metadata Card */}
-              <div className="md:col-span-2 bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Description</h3>
-                  <p className="text-sm text-surface-700 mt-1 whitespace-pre-wrap">
-                    {currentProject.description || <span className="italic">No description provided for this project.</span>}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-2">
+              <Card className="md:col-span-2">
+                <CardContent className="p-4 md:p-6 space-y-4">
                   <div>
-                    <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center">
-                      <Calendar className="mr-1 h-3.5 w-3.5" /> Start Date
-                    </h3>
-                    <p className="text-sm font-medium text-surface-800 mt-0.5">
-                      {currentProject.startDate ? format(new Date(currentProject.startDate), 'PP') : 'N/A'}
+                    <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Description</h3>
+                    <p className="text-sm text-surface-700 mt-1 whitespace-pre-wrap">
+                      {currentProject.description || <span className="italic">No description provided for this project.</span>}
                     </p>
                   </div>
-                  <div>
-                    <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center">
-                      <Calendar className="mr-1 h-3.5 w-3.5" /> Due Date
-                    </h3>
-                    <p className="text-sm font-medium text-surface-800 mt-0.5">
-                      {currentProject.dueDate ? format(new Date(currentProject.dueDate), 'PP') : 'N/A'}
-                    </p>
-                  </div>
-                </div>
-              </div>
 
-              {/* Roles / Creator Card */}
-              <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                  <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Project Owner</h3>
-                  <div className="flex items-center space-x-3 mt-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-bold uppercase text-sm">
-                      {currentProject.createdBy?.name?.charAt(0) || 'O'}
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-surface-100">
+                    <div>
+                      <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center">
+                        <Calendar className="mr-1 h-3.5 w-3.5" /> Start Date
+                      </h3>
+                      <p className="text-sm font-medium text-surface-800 mt-0.5">
+                        {currentProject.startDate ? format(new Date(currentProject.startDate), 'PP') : 'N/A'}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-surface-900">{currentProject.createdBy?.name}</p>
-                      <p className="text-xs text-surface-500">{currentProject.createdBy?.email}</p>
+                      <h3 className="text-xs font-semibold text-surface-400 uppercase tracking-wider flex items-center">
+                        <Calendar className="mr-1 h-3.5 w-3.5" /> Due Date
+                      </h3>
+                      <p className="text-sm font-medium text-surface-800 mt-0.5">
+                        {currentProject.dueDate ? format(new Date(currentProject.dueDate), 'PP') : 'N/A'}
+                      </p>
                     </div>
                   </div>
-                </div>
-                <div className="pt-4 border-t border-surface-100 text-xs text-surface-500">
-                  Created {format(new Date(currentProject.createdAt), 'PP')}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+
+              {/* Roles / Creator Card */}
+              <Card className="flex flex-col justify-between">
+                <CardContent className="p-4 md:p-6 h-full flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Project Owner</h3>
+                    <div className="flex items-center space-x-3 mt-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-600 font-bold uppercase text-sm">
+                        {currentProject.createdBy?.name?.charAt(0) || 'O'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-surface-900">{currentProject.createdBy?.name}</p>
+                        <p className="text-xs text-surface-500">{currentProject.createdBy?.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-4 mt-4 border-t border-surface-100 text-xs text-surface-500">
+                    Created {format(new Date(currentProject.createdAt), 'PP')}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Quick Task List Summary */}
-            <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
-              <h3 className="text-md font-semibold text-surface-800 mb-4">Project Tasks</h3>
-              {loadingTasks ? (
-                <div className="py-4 text-sm text-surface-400">Loading tasks...</div>
-              ) : projectTasks.length === 0 ? (
-                <div className="py-6 text-center text-sm text-surface-400 italic">No tasks created in this project yet. Open the Kanban Board tab to add tasks.</div>
-              ) : (
-                <div className="divide-y divide-surface-100">
-                  {projectTasks.map(task => {
-                    const { text: dueDateText, isOverdue } = smartDueDate(task.dueDate);
-                    return (
-                      <div key={task._id} className="py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm">
-                        <div className="flex items-center space-x-3 min-w-0">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ${
-                            task.priority === 'Urgent' ? 'bg-red-100 text-red-700' :
-                            task.priority === 'High' ? 'bg-orange-100 text-orange-700' :
-                            task.priority === 'Medium' ? 'bg-blue-100 text-blue-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {task.priority || 'Medium'}
-                          </span>
-                          <span className="font-semibold text-surface-900 truncate">{task.title}</span>
-                        </div>
-                        <div className="flex items-center space-x-4 shrink-0 text-xs text-surface-500">
-                          {task.dueDate && (
-                            <span className={`flex items-center ${isOverdue ? 'text-red-600 font-semibold' : ''}`}>
-                              <Clock className="mr-1 h-3.5 w-3.5" />
-                              {dueDateText}
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <h3 className="text-md font-bold text-surface-800 mb-4 border-b border-surface-100 pb-2">Project Tasks</h3>
+                {loadingTasks ? (
+                  <div className="py-4 text-sm text-surface-400">Loading tasks...</div>
+                ) : projectTasks.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-surface-400 italic">No tasks created in this project yet. Open the Kanban Board tab to add tasks.</div>
+                ) : (
+                  <div className="divide-y divide-surface-100">
+                    {projectTasks.map(task => {
+                      const { text: dueDateText, isOverdue } = smartDueDate(task.dueDate);
+                      return (
+                        <div key={task._id} className="py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm hover:bg-surface-50 px-2 -mx-2 rounded-lg transition-colors">
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase shrink-0 ${
+                              task.priority === 'Urgent' ? 'bg-red-50 text-red-700 border border-red-200' :
+                              task.priority === 'High' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                              task.priority === 'Medium' ? 'bg-primary-50 text-primary-700 border border-primary-200' :
+                              'bg-surface-50 text-surface-700 border border-surface-200'
+                            }`}>
+                              {task.priority || 'Medium'}
                             </span>
-                          )}
-                          <span className="flex items-center">
-                            <MessageSquare className="mr-1 h-3.5 w-3.5" />
-                            Comments: {task.commentsCount || 0}
-                          </span>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-surface-100 text-surface-600 uppercase tracking-wider">
-                            {task.status}
-                          </span>
+                            <span className="font-semibold text-surface-900 truncate">{task.title}</span>
+                          </div>
+                          <div className="flex items-center space-x-4 shrink-0 text-xs text-surface-500">
+                            {task.dueDate && (
+                              <span className={`flex items-center ${isOverdue ? 'text-red-600 font-semibold' : ''}`}>
+                                <Clock className="mr-1 h-3.5 w-3.5" />
+                                {dueDateText}
+                              </span>
+                            )}
+                            <span className="flex items-center">
+                              <MessageSquare className="mr-1 h-3.5 w-3.5" />
+                              {task.commentsCount || 0}
+                            </span>
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-surface-100 text-surface-600 uppercase tracking-wider">
+                              {task.status}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -416,88 +417,87 @@ const ProjectPage = () => {
           <div className="p-4 md:p-6 max-w-2xl space-y-6">
             {/* Add member form */}
             {canManageMembers && (
-              <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
-                <h3 className="text-md font-semibold text-surface-800 mb-3 flex items-center">
-                  <UserPlus className="mr-2 h-5 w-5 text-primary-500" />
-                  Add Team Member
-                </h3>
-                <form onSubmit={handleAddMember} className="flex gap-2">
-                  <input
-                    type="email"
-                    required
-                    placeholder="Enter teammate's email..."
-                    className="flex-1 rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                  />
-                  <Button type="submit" disabled={addingMember || !emailInput.trim()}>
-                    {addingMember ? 'Adding...' : 'Add'}
-                  </Button>
-                </form>
-              </div>
+              <Card>
+                <CardContent className="p-4 md:p-6">
+                  <h3 className="text-md font-bold text-surface-800 mb-4 flex items-center border-b border-surface-100 pb-2">
+                    <UserPlus className="mr-2 h-5 w-5 text-primary-500" />
+                    Add Team Member
+                  </h3>
+                  <form onSubmit={handleAddMember} className="flex gap-2">
+                    <input
+                      type="email"
+                      required
+                      placeholder="Enter teammate's email..."
+                      className="flex-1 rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                    />
+                    <Button type="submit" disabled={addingMember || !emailInput.trim()}>
+                      {addingMember ? 'Adding...' : 'Add'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
             )}
 
             {/* Members List */}
-            <div className="bg-white rounded-xl border border-surface-200 p-4 md:p-6 shadow-sm">
-              <h3 className="text-md font-semibold text-surface-800 mb-4">Project Members ({currentProject.members?.length || 0})</h3>
-              <div className="divide-y divide-surface-100">
-                {currentProject.members?.map((member) => {
-                  const mUser = member.user;
-                  if (!mUser) return null;
-                  const isMemOwner = member.role === 'owner';
-                  return (
-                    <div key={mUser._id} className="py-3.5 flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-bold uppercase text-sm">
-                            {mUser.name?.charAt(0) || 'U'}
+            <Card>
+              <CardContent className="p-4 md:p-6">
+                <h3 className="text-md font-bold text-surface-800 mb-4 border-b border-surface-100 pb-2">Project Members ({currentProject.members?.length || 0})</h3>
+                <div className="divide-y divide-surface-100">
+                  {currentProject.members?.map((member) => {
+                    const mUser = member.user;
+                    if (!mUser) return null;
+                    const isMemOwner = member.role === 'owner';
+                    return (
+                      <div key={mUser._id} className="py-3.5 flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="relative">
+                            <Avatar user={{...mUser, isOnline: onlineUsers.includes(mUser._id)}} size="md" />
                           </div>
-                          <span className={`absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full ring-2 ring-white ${
-                            onlineUsers.includes(mUser._id) ? 'bg-green-500' : 'bg-gray-400'
-                          }`} />
+                          <div>
+                            <p className="text-sm font-semibold text-surface-900">{mUser.name}</p>
+                            <p className="text-xs text-surface-500">{mUser.email}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-semibold text-surface-900">{mUser.name}</p>
-                          <p className="text-xs text-surface-500">{mUser.email}</p>
+                        <div className="flex items-center space-x-4">
+                          {canManageMembers && mUser._id !== currentUser?._id && member.role !== 'owner' ? (
+                            <select
+                              value={member.role}
+                              onChange={(e) => handleRoleChange(mUser._id, e.target.value)}
+                              className="text-xs font-semibold px-2 py-1 rounded border border-surface-300 bg-white text-surface-700 focus:border-primary-500 focus:outline-none"
+                            >
+                              <option value="admin">Admin</option>
+                              <option value="manager">Manager</option>
+                              <option value="member">Member</option>
+                            </select>
+                          ) : (
+                            <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded ${
+                              isMemOwner ? 'bg-accent-50 text-accent-700 border border-accent-200' :
+                              member.role === 'admin' ? 'bg-primary-50 text-primary-700 border border-primary-200' :
+                              member.role === 'manager' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                              'bg-surface-50 text-surface-600 border border-surface-200'
+                            }`}>
+                              {isMemOwner && <Crown className="h-3 w-3" />}
+                              {member.role}
+                            </span>
+                          )}
+                          {canManageMembers && mUser._id !== currentUser?._id && member.role !== 'owner' && (
+                            <button
+                              onClick={() => handleRemoveMember(mUser._id)}
+                              className="p-1 text-surface-400 hover:text-red-600 transition-colors"
+                              title="Remove member"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        {canManageMembers && mUser._id !== currentUser?._id && member.role !== 'owner' ? (
-                          <select
-                            value={member.role}
-                            onChange={(e) => handleRoleChange(mUser._id, e.target.value)}
-                            className="text-xs font-semibold px-2 py-1 rounded border border-surface-300 bg-white text-surface-700 focus:border-primary-500 focus:outline-none"
-                          >
-                            <option value="admin">Admin</option>
-                            <option value="manager">Manager</option>
-                            <option value="member">Member</option>
-                          </select>
-                        ) : (
-                          <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded ${
-                            isMemOwner ? 'bg-purple-100 text-purple-700' :
-                            member.role === 'admin' ? 'bg-blue-100 text-blue-700' :
-                            member.role === 'manager' ? 'bg-amber-100 text-amber-700' :
-                            'bg-surface-100 text-surface-600'
-                          }`}>
-                            {isMemOwner && <Shield className="h-3 w-3" />}
-                            {member.role}
-                          </span>
-                        )}
-                        {canManageMembers && mUser._id !== currentUser?._id && member.role !== 'owner' && (
-                          <button
-                            onClick={() => handleRemoveMember(mUser._id)}
-                            className="p-1 text-surface-400 hover:text-red-600 transition-colors"
-                            title="Remove member"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -611,37 +611,76 @@ const ProjectPage = () => {
         </div>
       )}
 
-      {/* Edit Project Modal */}
-      <Modal isOpen={isEditModalOpen} onClose={() => !isSubmittingEdit && setIsEditModalOpen(false)} title="Edit Project">
-        <form onSubmit={handleUpdateProject} className="space-y-4 mt-4">
-          <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Project Name</label>
-            <input
-              type="text"
-              required
-              value={editProjectName}
-              onChange={e => setEditProjectName(e.target.value)}
-              className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-            />
+      {/* Settings Modal */}
+      <Modal isOpen={isSettingsModalOpen} onClose={() => !isSubmittingEdit && setIsSettingsModalOpen(false)} title="Project Settings">
+        <div className="mt-4 space-y-6">
+          <form onSubmit={handleUpdateProject} className="space-y-4">
+            <h3 className="text-sm font-semibold text-surface-800 mb-3">General</h3>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Project Name</label>
+              <input
+                type="text"
+                required
+                value={editProjectName}
+                onChange={e => setEditProjectName(e.target.value)}
+                className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-surface-700 mb-1">Description</label>
+              <textarea
+                rows={3}
+                value={editProjectDesc}
+                onChange={e => setEditProjectDesc(e.target.value)}
+                className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              />
+            </div>
+            <div className="flex justify-end space-x-3 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsSettingsModalOpen(false)} disabled={isSubmittingEdit}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmittingEdit || !editProjectName.trim()}>
+                {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </form>
+
+          {/* Ownership Information */}
+          <div className="border-t border-surface-200 pt-4">
+            <h3 className="text-sm font-semibold text-surface-800 mb-3">Ownership</h3>
+            <div className="flex items-center space-x-3 p-3 bg-surface-50 rounded-lg border border-surface-200">
+              <Avatar user={currentProject.createdBy} size="md" />
+              <div>
+                <p className="text-sm font-medium text-surface-900 flex items-center">
+                  {currentProject.createdBy?.name || 'Unknown User'}
+                  <Crown className="ml-1.5 h-3.5 w-3.5 text-amber-500" />
+                </p>
+                <p className="text-xs text-surface-500">Project Creator & Owner</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Description</label>
-            <textarea
-              rows={4}
-              value={editProjectDesc}
-              onChange={e => setEditProjectDesc(e.target.value)}
-              className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-            />
-          </div>
-          <div className="flex justify-end space-x-3 pt-4 border-t border-surface-200 mt-6">
-            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isSubmittingEdit}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmittingEdit || !editProjectName.trim()}>
-              {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
-        </form>
+
+          {/* Danger Zone */}
+          {currentUserRole === 'admin' || currentUserRole === 'owner' ? (
+            <div className="border-t border-surface-200 pt-4">
+              <h3 className="text-sm font-semibold text-red-600 mb-2">Danger Zone</h3>
+              <p className="text-xs text-surface-500 mb-4">
+                Once you delete a project, it is archived and permanently removed from active workspaces.
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                onClick={() => {
+                  setIsSettingsModalOpen(false);
+                  setIsDeleteModalOpen(true);
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete this project
+              </Button>
+            </div>
+          ) : null}
+        </div>
       </Modal>
 
       {/* Delete Project Modal */}
