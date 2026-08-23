@@ -94,14 +94,19 @@ const logoutAllDevices = async (userId) => {
   await user.save({ validateBeforeSave: false });
 };
 
-const updateProfile = async (userId, { name, avatar }) => {
+const updateProfile = async (userId, data) => {
   const user = await User.findById(userId);
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
 
-  if (name) user.name = name;
-  if (avatar) user.avatar = avatar;
+  const allowedFields = ['name', 'avatar', 'jobTitle', 'department', 'location', 'bio', 'phone', 'linkedin', 'github'];
+  
+  allowedFields.forEach(field => {
+    if (data[field] !== undefined) {
+      user[field] = data[field];
+    }
+  });
 
   await user.save({ validateBeforeSave: false });
 
@@ -124,11 +129,58 @@ const changePassword = async (userId, currentPassword, newPassword) => {
   await user.save({ validateBeforeSave: false });
 };
 
+const fs = require('fs');
+const path = require('path');
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (e) {
+  console.warn('sharp not installed, image optimization will be skipped');
+}
+
+const updateAvatar = async (userId, file) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  if (!file) {
+    throw new ApiError(400, 'No image provided');
+  }
+
+  let finalFilename = file.filename;
+  
+  // If sharp is installed, convert to webp and resize
+  if (sharp) {
+    finalFilename = `avatar_${Date.now()}.webp`;
+    const outputPath = path.join(file.destination, finalFilename);
+    
+    await sharp(file.path)
+      .resize(256, 256, { fit: 'cover', position: 'center' })
+      .webp({ quality: 80 })
+      .toFile(outputPath);
+      
+    // Remove original temp file
+    fs.unlink(file.path, (err) => {
+      if (err) console.error('Error removing temp file', err);
+    });
+  }
+
+  // Generate URL
+  const avatarUrl = `${process.env.API_URL || 'http://localhost:5000'}/uploads/users/${userId}/${finalFilename}`;
+  
+  user.avatar = avatarUrl;
+  await user.save({ validateBeforeSave: false });
+  
+  return { avatar: avatarUrl };
+};
+
 module.exports = {
   registerUser,
   loginUser,
   logoutUser,
   logoutAllDevices,
   updateProfile,
-  changePassword
+  changePassword,
+  updateAvatar
 };

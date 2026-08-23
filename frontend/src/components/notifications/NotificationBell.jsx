@@ -4,7 +4,7 @@ import { Bell } from 'lucide-react';
 import NotificationPanel from './NotificationPanel';
 import { fetchNotifications } from '../../redux/slices/notificationSlice';
 
-const NotificationBell = () => {
+const NotificationBell = ({ align = 'right' }) => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const bellRef = useRef();
@@ -42,7 +42,7 @@ const NotificationBell = () => {
         )}
       </button>
 
-      <NotificationPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <NotificationPanel isOpen={isOpen} onClose={() => setIsOpen(false)} align={align} />
     </div>
   );
 };

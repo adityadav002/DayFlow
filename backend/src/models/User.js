@@ -42,7 +42,40 @@ const userSchema = new mongoose.Schema(
       {
         type: String
       }
-    ]
+    ],
+    jobTitle: {
+      type: String,
+      trim: true,
+      maxlength: 100
+    },
+    department: {
+      type: String,
+      trim: true,
+      maxlength: 100
+    },
+    location: {
+      type: String,
+      trim: true,
+      maxlength: 100
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 500
+    },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: 20
+    },
+    linkedin: {
+      type: String,
+      trim: true
+    },
+    github: {
+      type: String,
+      trim: true
+    }
   },
   {
     timestamps: true

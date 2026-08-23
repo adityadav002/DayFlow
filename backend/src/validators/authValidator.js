@@ -17,7 +17,14 @@ const loginSchema = z.object({
 
 const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50).optional(),
-  avatar: z.string().url('Avatar must be a valid URL').optional()
+  avatar: z.string().url('Avatar must be a valid URL').optional(),
+  jobTitle: z.string().max(100).optional().nullable(),
+  department: z.string().max(100).optional().nullable(),
+  location: z.string().max(100).optional().nullable(),
+  bio: z.string().max(500).optional().nullable(),
+  phone: z.string().max(20).optional().nullable(),
+  linkedin: z.string().optional().nullable(),
+  github: z.string().optional().nullable()
 });
 
 const changePasswordSchema = z.object({

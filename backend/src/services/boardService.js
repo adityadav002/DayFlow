@@ -29,6 +29,28 @@ const updateBoard = async (boardId, { title }) => {
 };
 
 const deleteBoard = async (boardId) => {
+  const Task = require('../models/Task');
+  const Activity = require('../models/Activity');
+  const Comment = require('../models/Comment');
+  const Attachment = require('../models/Attachment');
+
+  // Find all tasks associated with this board
+  const tasks = await Task.find({ boardId });
+  const taskIds = tasks.map(t => t._id);
+
+  if (taskIds.length > 0) {
+    // Delete activities and comments associated with these tasks
+    await Activity.deleteMany({ task: { $in: taskIds } });
+    await Comment.deleteMany({ task: { $in: taskIds } });
+    
+    // Delete attachments associated with these tasks
+    await Attachment.deleteMany({ entityType: 'task', entityId: { $in: taskIds } });
+
+    // Delete the tasks themselves
+    await Task.deleteMany({ boardId });
+  }
+
+  // Delete the board
   await Board.findByIdAndDelete(boardId);
 };
 

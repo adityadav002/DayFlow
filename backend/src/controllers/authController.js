@@ -98,6 +98,11 @@ const updateProfile = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, user, 'Profile updated successfully'));
 });
 
+const uploadAvatar = asyncHandler(async (req, res) => {
+  const result = await authService.updateAvatar(req.user._id, req.file);
+  res.status(200).json(new ApiResponse(200, result, 'Avatar updated successfully'));
+});
+
 const changePassword = asyncHandler(async (req, res) => {
   await authService.changePassword(req.user._id, req.body.currentPassword, req.body.newPassword);
   res.status(200).json(new ApiResponse(200, {}, 'Password changed successfully'));
@@ -111,5 +116,6 @@ module.exports = {
   logoutAll,
   getMe,
   updateProfile,
+  uploadAvatar,
   changePassword
 };

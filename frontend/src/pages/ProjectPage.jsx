@@ -13,6 +13,9 @@ import ProjectAnalytics from '../components/projects/ProjectAnalytics';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { smartDueDate } from '../utils/helpers';
+import Modal from '../components/common/Modal';
+import { fetchProjects } from '../redux/slices/projectSlice';
+import { Edit2 } from 'lucide-react';
 
 const ProjectPage = () => {
   const { projectId } = useParams();
@@ -35,6 +38,13 @@ const ProjectPage = () => {
   const [meetingTitle, setMeetingTitle] = useState('');
   const [meetingDate, setMeetingDate] = useState('');
   const [schedulingMeeting, setSchedulingMeeting] = useState(false);
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [editProjectName, setEditProjectName] = useState('');
+  const [editProjectDesc, setEditProjectDesc] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -159,6 +169,46 @@ const ProjectPage = () => {
     }
   };
 
+  const handleUpdateProject = async (e) => {
+    e.preventDefault();
+    if (!editProjectName.trim()) return;
+
+    setIsSubmittingEdit(true);
+    try {
+      await projectApi.updateProject(projectId, {
+        name: editProjectName,
+        description: editProjectDesc
+      });
+      toast.success('Project updated successfully');
+      setIsEditModalOpen(false);
+      dispatch(fetchProjectById(projectId));
+      if (currentProject.workspace) {
+        dispatch(fetchProjects({ workspace: currentProject.workspace }));
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to update project');
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    setIsSubmittingDelete(true);
+    try {
+      await projectApi.deleteProject(projectId);
+      toast.success('Project deleted successfully');
+      setIsDeleteModalOpen(false);
+      if (currentProject.workspace) {
+        dispatch(fetchProjects({ workspace: currentProject.workspace }));
+      }
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to delete project');
+    } finally {
+      setIsSubmittingDelete(false);
+    }
+  };
+
   if (currentProjectStatus === 'loading' || !currentProject) {
     return <Loader fullScreen />;
   }
@@ -193,6 +243,30 @@ const ProjectPage = () => {
               </div>
             </div>
           </div>
+          {canManageMembers && (
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="outline" 
+                className="h-9 px-3 text-sm"
+                onClick={() => {
+                  setEditProjectName(currentProject.name);
+                  setEditProjectDesc(currentProject.description);
+                  setIsEditModalOpen(true);
+                }}
+              >
+                <Edit2 className="mr-2 h-4 w-4" />
+                Edit
+              </Button>
+              <Button 
+                variant="outline" 
+                className="h-9 px-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Tab Controls */}
@@ -536,6 +610,60 @@ const ProjectPage = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Project Modal */}
+      <Modal isOpen={isEditModalOpen} onClose={() => !isSubmittingEdit && setIsEditModalOpen(false)} title="Edit Project">
+        <form onSubmit={handleUpdateProject} className="space-y-4 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Project Name</label>
+            <input
+              type="text"
+              required
+              value={editProjectName}
+              onChange={e => setEditProjectName(e.target.value)}
+              className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-surface-700 mb-1">Description</label>
+            <textarea
+              rows={4}
+              value={editProjectDesc}
+              onChange={e => setEditProjectDesc(e.target.value)}
+              className="w-full rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div className="flex justify-end space-x-3 pt-4 border-t border-surface-200 mt-6">
+            <Button type="button" variant="outline" onClick={() => setIsEditModalOpen(false)} disabled={isSubmittingEdit}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmittingEdit || !editProjectName.trim()}>
+              {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Project Modal */}
+      <Modal isOpen={isDeleteModalOpen} onClose={() => !isSubmittingDelete && setIsDeleteModalOpen(false)} title="Delete Project">
+        <div className="mt-4 space-y-4">
+          <p className="text-sm text-surface-600">
+            Are you sure you want to delete this project? This will archive the project and it will no longer be visible in your workspace.
+          </p>
+          <div className="flex justify-end space-x-3 pt-4 border-t border-surface-200">
+            <Button type="button" variant="outline" onClick={() => setIsDeleteModalOpen(false)} disabled={isSubmittingDelete}>
+              Cancel
+            </Button>
+            <Button 
+              className="bg-red-600 hover:bg-red-700 text-white" 
+              onClick={handleDeleteProject} 
+              disabled={isSubmittingDelete}
+            >
+              {isSubmittingDelete ? 'Deleting...' : 'Delete Project'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

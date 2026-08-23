@@ -15,7 +15,9 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Security Middlewares
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // Health Check
 app.get('/', (req, res) => {
@@ -38,7 +40,7 @@ if (env.NODE_ENV === 'development') {
 }
 
 // Static folder for uploads
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
 app.use('/api/v1', routes);

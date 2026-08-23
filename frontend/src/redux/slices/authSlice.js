@@ -61,6 +61,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updateUserLocally: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
     logoutLocally: (state) => {
       state.user = null;
       state.isAuthenticated = false;
@@ -124,5 +129,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, logoutLocally } = authSlice.actions;
+export const { clearError, logoutLocally, updateUserLocally } = authSlice.actions;
 export default authSlice.reducer;

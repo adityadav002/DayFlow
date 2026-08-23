@@ -2,6 +2,7 @@ const express = require('express');
 const authController = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const validate = require('../middlewares/validationMiddleware');
+const uploadAvatar = require('../middlewares/uploadAvatarMiddleware');
 const { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } = require('../validators/authValidator');
 const rateLimit = require('express-rate-limit');
 
@@ -21,6 +22,7 @@ router.post('/logout-all', protect, authController.logoutAll);
 
 router.get('/me', protect, authController.getMe);
 router.patch('/me', protect, validate(updateProfileSchema), authController.updateProfile);
+router.post('/me/avatar', protect, uploadAvatar.single('avatar'), authController.uploadAvatar);
 router.patch('/change-password', protect, validate(changePasswordSchema), authController.changePassword);
 
 module.exports = router;

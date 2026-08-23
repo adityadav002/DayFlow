@@ -20,7 +20,7 @@ const NOTIFICATION_ICONS = {
   TEAM_MEMBER_REMOVED: <Trash2 className="h-4 w-4 text-red-500" />,
 };
 
-const NotificationPanel = ({ isOpen, onClose }) => {
+const NotificationPanel = ({ isOpen, onClose, align = 'right' }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items: notifications, unreadCount, pagination, status } = useSelector((state) => state.notifications);
@@ -64,7 +64,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-surface-200 bg-white shadow-xl z-50 overflow-hidden flex flex-col max-h-[480px]">
+    <div className={`absolute ${align === 'right' ? 'right-0' : 'left-0'} mt-2 w-80 sm:w-96 rounded-xl border border-surface-200 bg-white shadow-xl z-50 overflow-hidden flex flex-col max-h-[480px]`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-surface-100 bg-surface-50 px-4 py-3 shrink-0">
         <div className="flex items-center space-x-2">

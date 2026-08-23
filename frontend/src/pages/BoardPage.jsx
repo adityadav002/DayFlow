@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import TaskDetailModal from '../components/boards/TaskDetailModal';
 import { isToday, isThisWeek, isBefore, startOfDay } from 'date-fns';
@@ -13,7 +13,8 @@ import {
   useSensors 
 } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { fetchBoardById } from '../redux/slices/boardSlice';
+import { fetchBoardById, fetchBoards } from '../redux/slices/boardSlice';
+import { updateBoard, deleteBoard } from '../api/boardApi';
 import { fetchTasks, bulkUpdatePositions, moveTaskOptimistically } from '../redux/slices/taskSlice';
 import useSocket from '../hooks/useSocket';
 import Loader from '../components/common/Loader';
@@ -22,7 +23,8 @@ import Column from '../components/boards/Column';
 import TaskCard from '../components/boards/TaskCard';
 import CreateTaskModal from '../components/boards/CreateTaskModal';
 import ShareBoardModal from '../components/boards/ShareBoardModal';
-import { Plus, Users, Settings } from 'lucide-react';
+import Modal from '../components/common/Modal';
+import { Plus, Users, Settings, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const COLUMNS = ['Backlog', 'Todo', 'In Progress', 'Review', 'Blocked', 'Done'];
@@ -40,16 +42,23 @@ const BoardPage = ({ boardId: propBoardId }) => {
   const { boardId: paramBoardId } = useParams();
   const boardId = propBoardId || paramBoardId;
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   
   // Initialize Socket connection and listeners
   useSocket(boardId);
 
   const { currentBoard, currentBoardStatus } = useSelector((state) => state.boards);
   const { items: tasks, status: tasksStatus } = useSelector((state) => state.tasks);
-  
+  const { user: currentUser } = useSelector((state) => state.auth);
+
   const [activeTask, setActiveTask] = useState(null);
   const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isDeleteBoardModalOpen, setIsDeleteBoardModalOpen] = useState(false);
+  const [editBoardTitle, setEditBoardTitle] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [isSubmittingDelete, setIsSubmittingDelete] = useState(false);
   const [initialStatus, setInitialStatus] = useState('Todo');
 
   const { search } = useLocation();
@@ -73,6 +82,40 @@ const BoardPage = ({ boardId: propBoardId }) => {
     setIsTaskModalOpen(false);
     setActiveTaskForModal(null);
     window.history.replaceState(null, '', window.location.pathname);
+  };
+
+  const handleUpdateBoard = async (e) => {
+    e.preventDefault();
+    if (!editBoardTitle.trim()) return;
+
+    setIsSubmittingEdit(true);
+    try {
+      await updateBoard(boardId, { title: editBoardTitle });
+      toast.success('Board updated successfully');
+      // Do not close settings modal automatically if they might want to do other things, 
+      // but typical behavior is to show success. Let's keep it open for a settings page experience.
+      dispatch(fetchBoardById(boardId));
+      dispatch(fetchBoards());
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to update board');
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
+
+  const handleDeleteBoard = async () => {
+    setIsSubmittingDelete(true);
+    try {
+      await deleteBoard(boardId);
+      toast.success('Board deleted successfully');
+      setIsDeleteBoardModalOpen(false);
+      dispatch(fetchBoards());
+      navigate('/dashboard');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to delete board');
+    } finally {
+      setIsSubmittingDelete(false);
+    }
   };
 
   // Filter states
@@ -265,34 +308,48 @@ const BoardPage = ({ boardId: propBoardId }) => {
     return <Loader fullScreen />;
   }
 
+  const isBoardOwner = currentBoard.createdBy?._id === currentUser?._id;
+
   return (
     <div className="flex h-full flex-col bg-surface-50">
-      {/* Board Header */}
-      <header className="flex shrink-0 items-center justify-between border-b border-surface-200 bg-white px-6 py-4">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-bold text-surface-900">{currentBoard.title}</h1>
-          <div className="flex -space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary-100 text-xs font-medium text-primary-700">
-              {currentBoard.createdBy.name?.charAt(0) || 'U'}
+      {/* Board Header (Only for standalone boards) */}
+      {!propBoardId && (
+        <header className="flex shrink-0 items-center justify-between border-b border-surface-200 bg-white px-6 py-4">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-bold text-surface-900">{currentBoard.title}</h1>
+            <div className="flex -space-x-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary-100 text-xs font-medium text-primary-700">
+                {currentBoard.createdBy.name?.charAt(0) || 'U'}
+              </div>
             </div>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-surface-500"
+              onClick={() => setIsShareModalOpen(true)}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Share
+            </Button>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-surface-500"
-            onClick={() => setIsShareModalOpen(true)}
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Share
-          </Button>
-        </div>
-        <div>
-          <Button variant="ghost" size="sm" className="text-surface-500">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
-        </div>
-      </header>
+          <div className="flex items-center space-x-2">
+            {isBoardOwner && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 px-2.5 text-xs text-surface-500"
+                onClick={() => {
+                  setEditBoardTitle(currentBoard.title);
+                  setIsSettingsModalOpen(true);
+                }}
+              >
+                <Settings className="mr-1.5 h-3.5 w-3.5" />
+                Settings
+              </Button>
+            )}
+          </div>
+        </header>
+      )}
 
       {/* Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-surface-200 bg-surface-50 px-6 py-2 shrink-0">
@@ -436,6 +493,71 @@ const BoardPage = ({ boardId: propBoardId }) => {
           task={activeTaskForModal}
         />
       )}
+
+      {/* Settings Modal */}
+      <Modal isOpen={isSettingsModalOpen} onClose={() => !isSubmittingEdit && setIsSettingsModalOpen(false)} title="Board Settings">
+        <div className="mt-4 space-y-6">
+          {/* General Settings */}
+          <form onSubmit={handleUpdateBoard}>
+            <h3 className="text-sm font-semibold text-surface-800 mb-3">General</h3>
+            <div>
+              <label className="block text-xs font-medium text-surface-600 mb-1">Board Title</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={editBoardTitle}
+                  onChange={e => setEditBoardTitle(e.target.value)}
+                  className="flex-1 rounded-md border border-surface-300 px-3 py-2 text-sm focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                />
+                <Button type="submit" disabled={isSubmittingEdit || !editBoardTitle.trim() || editBoardTitle === currentBoard.title}>
+                  {isSubmittingEdit ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
+            </div>
+          </form>
+
+          {/* Danger Zone */}
+          <div className="border-t border-surface-200 pt-4">
+            <h3 className="text-sm font-semibold text-red-600 mb-2">Danger Zone</h3>
+            <p className="text-xs text-surface-500 mb-4">
+              Once you delete a board, there is no going back. Please be certain.
+            </p>
+            <Button 
+              variant="outline" 
+              className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+              onClick={() => {
+                setIsSettingsModalOpen(false);
+                setIsDeleteBoardModalOpen(true);
+              }}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete this board
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Board Modal */}
+      <Modal isOpen={isDeleteBoardModalOpen} onClose={() => !isSubmittingDelete && setIsDeleteBoardModalOpen(false)} title="Delete Board">
+        <div className="mt-4 space-y-4">
+          <p className="text-sm text-surface-600">
+            Are you sure you want to delete this board? This action is permanent and will cascade delete all tasks associated with this board.
+          </p>
+          <div className="flex justify-end space-x-3 pt-4 border-t border-surface-200">
+            <Button type="button" variant="outline" onClick={() => setIsDeleteBoardModalOpen(false)} disabled={isSubmittingDelete}>
+              Cancel
+            </Button>
+            <Button 
+              className="bg-red-600 hover:bg-red-700 text-white" 
+              onClick={handleDeleteBoard} 
+              disabled={isSubmittingDelete}
+            >
+              {isSubmittingDelete ? 'Deleting...' : 'Delete Board'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

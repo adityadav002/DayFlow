@@ -12,6 +12,7 @@ import CreateBoardModal from '../boards/CreateBoardModal';
 import CreateProjectModal from '../projects/CreateProjectModal';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import NotificationBell from '../notifications/NotificationBell';
+import Avatar from '../common/Avatar';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -72,7 +73,7 @@ const Sidebar = () => {
             <span className="text-lg font-bold text-surface-900">DayFlow</span>
           </div>
           <div className="flex items-center space-x-1">
-            <NotificationBell />
+            <NotificationBell align="left" />
             <button
               className="md:hidden rounded-md p-1 hover:bg-surface-100 flex items-center justify-center"
               onClick={() => dispatch(toggleSidebar())}
@@ -189,13 +190,14 @@ const Sidebar = () => {
 
         {/* User Profile & Logout */}
         <div className="border-t border-surface-200 p-4">
-          <div className="mb-4 flex items-center px-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-bold uppercase">
-              {user?.name?.charAt(0) || 'U'}
-            </div>
+          <div 
+            className="mb-4 flex items-center px-3 cursor-pointer group hover:bg-surface-50 rounded-lg py-2 transition-colors -mx-3"
+            onClick={() => navigate('/profile')}
+          >
+            <Avatar user={user} size="md" className="group-hover:ring-2 group-hover:ring-primary-100 transition-all" />
             <div className="ml-3 overflow-hidden">
-              <p className="truncate text-sm font-medium text-surface-900">{user?.name}</p>
-              <p className="truncate text-xs text-surface-500">{user?.email}</p>
+              <p className="truncate text-sm font-medium text-surface-900 group-hover:text-primary-700 transition-colors">{user?.name}</p>
+              <p className="truncate text-xs text-surface-500">{user?.jobTitle || user?.email}</p>
             </div>
           </div>
           <Button

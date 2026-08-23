@@ -11,6 +11,7 @@ const Register = React.lazy(() => import('../pages/Register'));
 const Dashboard = React.lazy(() => import('../pages/Dashboard'));
 const BoardPage = React.lazy(() => import('../pages/BoardPage'));
 const EventsPage = React.lazy(() => import('../pages/EventsPage'));
+const ProfilePage = React.lazy(() => import('../pages/ProfilePage'));
 const RemindersPage = React.lazy(() => import('../pages/RemindersPage'));
 const CalendarPage = React.lazy(() => import('../pages/CalendarPage'));
 const MyDayPage = React.lazy(() => import('../pages/MyDayPage'));
@@ -37,6 +38,7 @@ const AppRoutes = () => {
             <Route path="/teams/:teamId/dashboard" element={<DashboardView />} />
             <Route path="/b/:boardId" element={<BoardPage />} />
             <Route path="/projects/:projectId" element={<ProjectPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/reminders" element={<RemindersPage />} />
             <Route path="/calendar" element={<CalendarPage />} />

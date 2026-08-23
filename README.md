@@ -96,3 +96,8 @@ A real-time collaborative Kanban board application built with the MERN stack (Mo
 - **Fractional Indexing**: Tasks use a position value that allows for fast reordering without updating all other tasks in the column.
 - **Optimistic Concurrency Control**: Tasks use a `version` field to prevent conflicting updates from multiple users.
 - **Service Layer**: Business logic is separated into service files (`taskService.js`, etc.) to keep controllers thin and testable.
+
+
+website color theme:
+ emerald green, midnight blue, and warm taupe
+ 
