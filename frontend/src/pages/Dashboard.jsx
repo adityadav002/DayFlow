@@ -46,7 +46,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Summary row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 relative z-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10 relative z-10">
         <Card className="rounded-[12px]">
           <CardContent className="p-5 flex items-center gap-4">
             <div className="h-12 w-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 shrink-0">

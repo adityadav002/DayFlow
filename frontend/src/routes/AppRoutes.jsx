@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 
 import AppLayout from '../components/layout/AppLayout';
+import AuthLayout from '../components/layout/AuthLayout';
 
 // Lazy loading can be added here, for now using regular imports
 // We'll replace these with actual components soon
@@ -27,8 +28,10 @@ const AppRoutes = () => {
       </div>
     }>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
         
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>

@@ -51,7 +51,7 @@ const AppLayout = () => {
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Global Header */}
-        <header className="flex h-14 items-center justify-between border-b border-surface-200 bg-white px-4 md:px-6 shrink-0 z-10">
+        <header className="flex h-14 items-center justify-between border-b border-surface-200 bg-white px-4 md:px-6 shrink-0 z-40">
           <div className="flex items-center">
             <button 
               onClick={() => dispatch(toggleSidebar())}
@@ -60,9 +60,7 @@ const AppLayout = () => {
               <Menu className="h-5 w-5 text-surface-600" />
             </button>
             <div className="flex items-center space-x-2 md:hidden">
-              <div className="h-8 w-8 rounded-lg bg-primary-500 shadow-md flex items-center justify-center">
-                <span className="font-bold text-white">D</span>
-              </div>
+              <img src="/dayflow-favicon.svg" alt="DayFlow Logo" className="h-8 w-8" />
               <span className="font-semibold text-surface-900">DayFlow</span>
             </div>
             {/* Desktop spacer */}

@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Layers } from 'lucide-react';
 import { registerSchema } from '../utils/validationSchemas';
 import { registerUser, clearError } from '../redux/slices/authSlice';
 import Input from '../components/common/Input';
@@ -41,24 +40,21 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-50 p-4">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl">
-        <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
-            <Layers className="h-8 w-8" />
-          </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-surface-900">Create an account</h2>
-          <p className="mt-2 text-sm text-surface-500">
-            Start organizing your tasks today
+    <div className="w-full animate-fade-in">
+      <div className="mb-8">
+          <h2 className="text-3xl font-semibold text-surface-900 tracking-tight">Create your DayFlow account</h2>
+          <p className="mt-2 text-surface-500">
+            Bring your tasks, projects and schedule together.
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <Input
               label="Full Name"
               type="text"
               placeholder="John Doe"
+              autoComplete="name"
               {...register('name')}
               error={errors.name?.message}
             />
@@ -66,6 +62,7 @@ const Register = () => {
               label="Email Address"
               type="email"
               placeholder="you@example.com"
+              autoComplete="email"
               {...register('email')}
               error={errors.email?.message}
             />
@@ -73,6 +70,7 @@ const Register = () => {
               label="Password"
               type="password"
               placeholder="••••••••"
+              autoComplete="new-password"
               {...register('password')}
               error={errors.password?.message}
             />
@@ -80,20 +78,19 @@ const Register = () => {
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full h-11 text-base mt-2"
             isLoading={status === 'loading'}
           >
-            Sign up
+            {status === 'loading' ? 'Creating account...' : 'Create account'}
           </Button>
         </form>
 
-        <p className="text-center text-sm text-surface-600">
+        <p className="mt-8 text-center text-sm text-surface-500">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+          <Link to="/login" className="font-medium text-primary-600 hover:text-primary-700 transition-colors">
             Sign in
           </Link>
         </p>
-      </div>
     </div>
   );
 };

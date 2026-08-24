@@ -41,6 +41,13 @@ const getProjects = async (userId, query) => {
   if (query.workspace) {
     filter.workspace = query.workspace;
   }
+  
+  if (query.status) {
+    filter.status = query.status;
+  } else {
+    filter.status = { $ne: 'archived' };
+  }
+
   return await Project.find(filter)
     .populate('members.user', 'name email avatar')
     .populate('createdBy', 'name email avatar')
@@ -91,6 +98,42 @@ const deleteProject = async (projectId) => {
   if (!project) {
     throw new ApiError(404, 'Project not found');
   }
+
+  console.log('Archiving project:', project._id, 'boardId:', project.boardId);
+  console.log('Archiving project:', project._id, 'boardId:', project.boardId);
+  
+  let targetBoardId = project.boardId;
+  
+  // If boardId is missing for some reason, try to find the board with the same title
+  if (!targetBoardId) {
+    const board = await Board.findOne({ title: project.name, createdBy: project.createdBy });
+    if (board) {
+      targetBoardId = board._id;
+      console.log('Found orphaned board by title:', targetBoardId);
+    }
+  }
+
+  if (targetBoardId) {
+    try {
+      console.log('Attempting to delete board:', targetBoardId);
+      const boardService = require('./boardService');
+      await boardService.deleteBoard(targetBoardId);
+      console.log('Board deleted successfully via service');
+    } catch (err) {
+      console.error('Failed to delete associated board via service', err);
+    }
+    
+    // Explicitly delete it just in case boardService failed
+    try {
+      await Board.findByIdAndDelete(targetBoardId);
+      console.log('Board explicitly deleted via model');
+    } catch (err) {
+      console.error('Failed to explicitly delete board', err);
+    }
+  } else {
+    console.log('No boardId found to delete');
+  }
+
   return project;
 };
 
