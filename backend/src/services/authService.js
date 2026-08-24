@@ -148,27 +148,22 @@ const updateAvatar = async (userId, file) => {
     throw new ApiError(400, 'No image provided');
   }
 
-  let finalFilename = file.filename;
+  let avatarUrl = '';
   
   // If sharp is installed, convert to webp and resize
   if (sharp) {
-    finalFilename = `avatar_${Date.now()}.webp`;
-    const outputPath = path.join(file.destination, finalFilename);
-    
-    await sharp(file.path)
+    const imageBuffer = await sharp(file.buffer)
       .resize(256, 256, { fit: 'cover', position: 'center' })
       .webp({ quality: 80 })
-      .toFile(outputPath);
-      
-    // Remove original temp file
-    fs.unlink(file.path, (err) => {
-      if (err) console.error('Error removing temp file', err);
-    });
+      .toBuffer();
+    
+    avatarUrl = `data:image/webp;base64,${imageBuffer.toString('base64')}`;
+  } else {
+    // Fallback if sharp is not installed
+    const mimeType = file.mimetype || 'image/jpeg';
+    avatarUrl = `data:${mimeType};base64,${file.buffer.toString('base64')}`;
   }
 
-  // Generate URL
-  const avatarUrl = `${process.env.API_URL || 'http://localhost:5000'}/uploads/users/${userId}/${finalFilename}`;
-  
   user.avatar = avatarUrl;
   await user.save({ validateBeforeSave: false });
   

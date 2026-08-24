@@ -1,22 +1,7 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Save to uploads/users/{userId}
-    const userId = req.user._id;
-    const dir = path.join(__dirname, '..', '..', 'uploads', 'users', userId.toString());
-    
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    // The file will be processed by sharp later, but we save the original temporarily
-    const sanitized = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-    cb(null, `temp_${Date.now()}_${sanitized}`);
-  }
-});
+const storage = multer.memoryStorage();
 
 const uploadAvatar = multer({
   storage,

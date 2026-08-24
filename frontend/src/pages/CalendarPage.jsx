@@ -244,35 +244,37 @@ const CalendarPage = () => {
   return (
     <div className="flex h-full flex-col bg-surface-50 custom-scrollbar overflow-hidden">
       {/* Calendar Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 shrink-0 border-b border-surface-200 bg-white z-10">
-        <div className="flex items-center gap-4">
-          <h1 className="text-[28px] font-medium text-surface-900 tracking-tight">Calendar</h1>
+      <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 p-4 md:p-6 shrink-0 border-b border-surface-200 bg-white z-10">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 w-full xl:w-auto">
+          <h1 className="text-[24px] md:text-[28px] font-medium text-surface-900 tracking-tight">Calendar</h1>
           
           {/* Navigation Controls */}
-          <div className="flex items-center border border-surface-200 rounded-[10px] overflow-hidden ml-4 shadow-sm bg-white">
-            <button 
-              onClick={handlePrev}
-              className="p-2 hover:bg-surface-50 border-r border-surface-200 text-surface-600 transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="px-5 py-2 text-[14px] font-medium text-surface-900 min-w-[160px] text-center">
-              {getHeaderDateLabel()}
-            </span>
-            <button 
-              onClick={handleNext}
-              className="p-2 hover:bg-surface-50 border-l border-surface-200 text-surface-600 transition-colors"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center border border-surface-200 rounded-[10px] overflow-hidden shadow-sm bg-white">
+              <button 
+                onClick={handlePrev}
+                className="p-1.5 md:p-2 hover:bg-surface-50 border-r border-surface-200 text-surface-600 transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="px-3 md:px-5 py-1.5 md:py-2 text-[12px] md:text-[14px] font-medium text-surface-900 min-w-[120px] md:min-w-[160px] text-center">
+                {getHeaderDateLabel()}
+              </span>
+              <button 
+                onClick={handleNext}
+                className="p-1.5 md:p-2 hover:bg-surface-50 border-l border-surface-200 text-surface-600 transition-colors"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+            
+            <Button size="sm" variant="secondary" onClick={handleToday} className="h-8 md:h-9 px-3 text-[12px] md:text-[13px]">
+              Today
+            </Button>
           </div>
-          
-          <Button size="sm" variant="secondary" onClick={handleToday} className="h-9">
-            Today
-          </Button>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 hide-scrollbar">
           {/* Filters */}
           <div className="flex items-center space-x-2 border border-surface-200 rounded-[10px] bg-white px-2 py-1 shadow-sm h-9">
             <Users className="h-4 w-4 text-surface-400 ml-1" />
